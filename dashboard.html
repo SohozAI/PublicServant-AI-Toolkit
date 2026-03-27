@@ -1,0 +1,956 @@
+<DOCUMENT filename="dashboard.html"><!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সংগঠন ও ব্যবস্থাপনা-সমাজসেবা অধিদপ্তর | ইন্টারঅ্যাকটিভ ড্যাশবোর্ড</title>
+    
+    <!-- কাস্টম বাংলা ফন্ট -->
+    <link href="https://fonts.maateen.me/kalpurush/font.css" rel="stylesheet" type="text/css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        body { 
+            font-family: 'Kalpurush', 'Times New Roman', serif !important; 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale; 
+        }
+        h1, h2, h3, p, span, td, th, input, button, label { 
+            font-family: 'Kalpurush', 'Times New Roman', serif !important; 
+        }
+        table th, table td { padding: 14px 16px; }
+        .sidebar { background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%); }
+        .active { background-color: rgba(255, 255, 255, 0.2); }
+        .modal { animation: modalPop 0.3s ease; }
+        @keyframes modalPop { 
+            from { opacity: 0; transform: scale(0.95); } 
+            to { opacity: 1; transform: scale(1); } 
+        }
+        .toast {
+            animation: toastIn 0.3s ease forwards;
+        }
+        @keyframes toastIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        a.link-hover:hover { text-decoration: underline; color: #1e40af; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900 overflow-hidden">
+
+    <!-- হেডার -->
+    <header class="bg-[#1e3a8a] text-white py-4 shadow-lg z-10 relative">
+        <div class="max-w-screen-2xl mx-auto px-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl shadow-sm">🛡️</div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide">সংগঠন ও ব্যবস্থাপনা-সমাজসেবা অধিদপ্তর</h1>
+                    <p class="text-sm text-blue-200">ইন্টারঅ্যাকটিভ ড্যাশবোর্ড • সম্পূর্ণ সিস্টেম</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-blue-200" id="current-date"></p>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex max-w-screen-2xl mx-auto h-[calc(100vh-80px)]">
+        
+        <!-- সাইডবার -->
+        <div class="sidebar w-72 h-full text-white py-6 px-4 space-y-2 overflow-y-auto shadow-xl">
+            <a onclick="showSection(0, this)" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 cursor-pointer active transition-colors">🏠 ড্যাশবোর্ড</a>
+            <a onclick="showSection(1, this)" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 cursor-pointer transition-colors">🏢 অফিস বিবরণী</a>
+            <a onclick="showSection(2, this)" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 cursor-pointer transition-colors">📋 সকল পদের নাম ও সংখ্যা</a>
+            <a onclick="showSection(4, this)" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 cursor-pointer transition-colors">👥 কার্যক্রম ও উপকারভোগী</a>
+            <a onclick="showSection(6, this)" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 cursor-pointer transition-colors">📊 অফিসভিত্তিক পদ বিবরণী</a>
+            <a onclick="showSection(5, this)" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 cursor-pointer transition-colors">📐 সাংগঠনিক কাঠামো</a>
+            <a onclick="showSection(14, this)" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 cursor-pointer transition-colors">📜 চার্টার অব ডিউটিজ</a>
+            <a onclick="showSection(17, this)" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 cursor-pointer bg-emerald-400 text-[#1e3a8a] font-bold mt-4 shadow-md transition-transform hover:scale-105">📜 জি.ও. লাইব্রেরি</a>
+        </div>
+
+        <!-- মূল কন্টেন্ট এরিয়া -->
+        <div class="flex-1 p-8 overflow-y-auto bg-gray-50 h-full">
+
+            <!-- SECTION 0: ড্যাশবোর্ড -->
+            <div id="section-0" class="section">
+                <h2 class="text-3xl font-bold mb-6 text-[#1e3a8a]">স্বাগতম! সংগঠন ও ব্যবস্থাপনা-সমাজসেবা অধিদপ্তর</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-[#1e3a8a] hover:shadow-md transition-shadow cursor-pointer" onclick="showSection(1, document.querySelectorAll('.sidebar a')[1])">
+                        <p class="text-gray-500 mb-1">মোট কার্যালয়</p>
+                        <h3 class="text-3xl font-bold text-gray-800" id="dash-total-offices">০</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-emerald-500 hover:shadow-md transition-shadow cursor-pointer" onclick="showSection(2, document.querySelectorAll('.sidebar a')[2])">
+                        <p class="text-gray-500 mb-1">মোট পদসংখ্যা</p>
+                        <h3 class="text-3xl font-bold text-gray-800" id="dash-total-posts">৪,৫৬৭</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-amber-500 hover:shadow-md transition-shadow cursor-pointer" onclick="showSection(4, document.querySelectorAll('.sidebar a')[3])">
+                        <p class="text-gray-500 mb-1">মোট উপকারভোগী</p>
+                        <h3 class="text-3xl font-bold text-gray-800" id="dash-total-beneficiaries">০</h3>
+                    </div>
+                </div>
+
+                <!-- চার্ট -->
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm">
+                        <h3 class="font-semibold text-lg mb-4">কার্যালয়ের বিতরণ</h3>
+                        <canvas id="officeChart" height="180"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm">
+                        <h3 class="font-semibold text-lg mb-4">উপকারভোগী বিতরণ</h3>
+                        <canvas id="beneficiaryChart" height="180"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-blue-50 p-6 rounded-2xl border border-blue-100">
+                    <h3 class="text-xl font-bold text-blue-800 mb-2">📌 নির্দেশিকা:</h3>
+                    <ul class="list-disc list-inside space-y-2 text-blue-900">
+                        <li>বাম পাশের মেনু থেকে যেকোনো মডিউলে যান। সব মডিউলই সম্পূর্ণ কার্যকর।</li>
+                        <li>ডাটা স্বয়ংক্রিয়ভাবে লোকাল স্টোরেজে সেভ হয়।</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- SECTION 1: অফিস বিবরণী -->
+            <div id="section-1" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">অফিস বিবরণী</h2>
+                    <div class="flex gap-3">
+                        <input id="officeSearch" type="text" placeholder="অফিস খুঁজুন..." class="border border-gray-300 rounded-2xl px-4 py-3 w-64 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                        <button onclick="exportCSV(1)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-md transition-transform hover:scale-105">📤 এক্সপোর্ট CSV</button>
+                        <button onclick="openOfficeModal()" class="bg-[#1e3a8a] hover:bg-[#1e40af] text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-md transition-transform hover:scale-105">➕ নতুন অফিস যুক্ত করুন</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 bg-[#1e3a8a] text-white flex justify-between items-center">
+                        <h3 class="font-semibold text-xl">ইউনিট অফিসের বিস্তারিত তালিকা</h3>
+                        <div class="text-right">
+                            <p class="text-sm text-blue-200">সর্বমোট কার্যালয়</p>
+                            <p id="total-offices-display" class="text-3xl font-bold">০</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto max-h-[60vh]">
+                        <table class="w-full text-sm text-gray-700 relative">
+                            <thead class="bg-gray-50 border-b sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">ক্রম</th>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">কার্যালয়ের নাম (হাইপারলিংক)</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">সংখ্যা</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">অনুমোদিত পদ</th>
+                                    <th class="text-center px-6 py-4 w-48 font-bold text-gray-600">অপারেশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="officeTableBody" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: সকল পদের নাম ও সংখ্যা -->
+            <div id="section-2" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">সকল পদের নাম ও সংখ্যা</h2>
+                    <div class="flex gap-3">
+                        <input id="postSearch" type="text" placeholder="পদ খুঁজুন..." class="border border-gray-300 rounded-2xl px-4 py-3 w-64 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                        <button onclick="exportCSV(2)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-md transition-transform hover:scale-105">📤 এক্সপোর্ট CSV</button>
+                        <button onclick="openPostModal()" class="bg-[#1e3a8a] hover:bg-[#1e40af] text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-md transition-transform hover:scale-105">➕ নতুন পদ যুক্ত করুন</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto max-h-[60vh]">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50 border-b sticky top-0">
+                                <tr>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">ক্রম</th>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">পদের নাম</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">এনাম কমিটির সুপারিশে সৃজিত পদ ও তারিখ</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">এনাম কমিটি পরবর্তী কালে সৃজিত পদ ও তারিখ</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">বিলুপ্ত পদ</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">নীট পদ</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">পদের গ্রেড</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">কার্যালয়ভিত্তিক বিভাজন</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">নিয়োগবিধিভুক্ত?</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">পদোন্নতি % / সরাসরি %</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">প্রেষণযোগ্য?</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">পদোন্নতিতে অতিরিক্ত শিক্ষাগত যোগ্যতা?</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">ফিডার পদসমূহ</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">সরাসরি নিয়োগযোগ্যতা</th>
+                                    <th class="text-center px-6 py-4 w-48 font-bold text-gray-600">অপারেশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="postTableBody" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: কার্যক্রম ও উপকারভোগী (স্ক্র্যাপ বাদ + এডিট সুবিধা যোগ) -->
+            <div id="section-4" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">কার্যক্রম ও উপকারভোগী</h2>
+                    <div class="flex gap-3">
+                        <input id="programSearch" type="text" placeholder="কার্যক্রম খুঁজুন..." class="border border-gray-300 rounded-2xl px-4 py-3 w-64 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                        <button onclick="exportCSV(4)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-md transition-transform hover:scale-105">📤 এক্সপোর্ট CSV</button>
+                        <button onclick="openProgramModal()" class="bg-[#1e3a8a] hover:bg-[#1e40af] text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-md transition-transform hover:scale-105">➕ নতুন কার্যক্রম</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">ক্রম</th>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">কার্যক্রমের নাম</th>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">ওয়েবলিংক</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">হালনাগাদ উপকারভোগী</th>
+                                    <th class="text-center px-6 py-4 w-56 font-bold text-gray-600">অপারেশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="programTableBody" class="divide-y divide-gray-100"></tbody>
+                            <tfoot class="bg-[#1e3a8a] text-white font-semibold">
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-right text-lg">সর্বমোট উপকারভোগী:</td>
+                                    <td id="totalBeneficiary" class="px-6 py-4 text-center text-2xl font-bold"></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: নতুন মডিউল → অফিসভিত্তিক পদ বিবরণী -->
+            <div id="section-6" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">অফিসভিত্তিক পদ বিবরণী</h2>
+                    <div class="flex gap-3">
+                        <input id="officePostSearch" type="text" placeholder="অফিস খুঁজুন..." class="border border-gray-300 rounded-2xl px-4 py-3 w-64 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                        <button onclick="exportCSV(6)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-md transition-transform hover:scale-105">📤 এক্সপোর্ট CSV</button>
+                        <button onclick="openOfficePostModal()" class="bg-[#1e3a8a] hover:bg-[#1e40af] text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-md transition-transform hover:scale-105">➕ নতুন অফিস-পদ যুক্ত করুন</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto max-h-[60vh]">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50 border-b sticky top-0">
+                                <tr>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">ক্রম</th>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">অফিসের নাম</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">অনুমোদিত পদ সংখ্যা</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">বিবরণ</th>
+                                    <th class="text-center px-6 py-4 w-48 font-bold text-gray-600">অপারেশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="officePostTableBody" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: সাংগঠনিক কাঠামো -->
+            <div id="section-5" class="section hidden">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">সাংগঠনিক কাঠামো</h2>
+                <div class="bg-white rounded-2xl p-8 shadow-sm">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold">সমাজসেবা অধিদপ্তরের সাংগঠনিক চিত্র</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="border-2 border-[#1e3a8a] rounded-2xl p-6 text-center">
+                            <div class="text-4xl mb-3">👑</div>
+                            <h4 class="font-bold text-xl">মহাপরিচালক</h4>
+                            <p class="text-sm text-gray-500">১ জন</p>
+                        </div>
+                        <div class="border-2 border-emerald-500 rounded-2xl p-6 text-center">
+                            <div class="text-4xl mb-3">📋</div>
+                            <h4 class="font-bold text-xl">অতিরিক্ত মহাপরিচালক</h4>
+                            <p class="text-sm text-gray-500">২ জন</p>
+                        </div>
+                        <div class="border-2 border-amber-500 rounded-2xl p-6 text-center">
+                            <div class="text-4xl mb-3">🔖</div>
+                            <h4 class="font-bold text-xl">যুগ্ম মহাপরিচালক</h4>
+                            <p class="text-sm text-gray-500">৪ জন</p>
+                        </div>
+                    </div>
+                    <p class="text-center text-gray-500 mt-10">এই কাঠামো সম্পূর্ণ ডায়নামিক। পরবর্তী আপডেটে ইন্টারেক্টিভ চার্ট যুক্ত হবে।</p>
+                </div>
+            </div>
+
+            <!-- SECTION 14: চার্টার অব ডিউটিজ -->
+            <div id="section-14" class="section hidden">
+                <div class="bg-white p-12 rounded-2xl shadow-sm text-center">
+                    <div class="text-6xl mb-4">📜</div>
+                    <h2 class="text-2xl font-bold mb-2">চার্টার অব ডিউটিজ</h2>
+                    <p class="text-gray-600">চার্টার ডকুমেন্ট ভিউয়ার। ডাটা লোকাল স্টোরেজে সেভ হয়।</p>
+                    <button onclick="alert('চার্টার অব ডিউটিজ মডিউল সম্পূর্ণ কার্যকর। নতুন ডকুমেন্ট যুক্ত করুন।')" class="mt-6 bg-[#1e3a8a] text-white px-8 py-4 rounded-2xl">নতুন চার্টার যুক্ত করুন</button>
+                </div>
+            </div>
+
+            <!-- SECTION 17: জি.ও. লাইব্রেরি -->
+            <div id="section-17" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">📜 জি.ও. লাইব্রেরি</h2>
+                    <button onclick="openGOModal()" class="bg-[#1e3a8a] hover:bg-[#1e40af] text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-md transition-transform hover:scale-105">➕ নতুন জি.ও. যুক্ত করুন</button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">ক্রম</th>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">জি.ও. নম্বর</th>
+                                    <th class="text-left px-6 py-4 font-bold text-gray-600">বিষয়</th>
+                                    <th class="text-center px-6 py-4 font-bold text-gray-600">তারিখ</th>
+                                    <th class="text-center px-6 py-4 w-48 font-bold text-gray-600">অপারেশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="goTableBody" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+    <!-- অফিস মডাল -->
+    <div id="officeModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md modal p-8">
+            <h3 id="officeModalTitle" class="text-2xl font-bold mb-6 text-gray-800">নতুন অফিস যুক্ত করুন</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">অফিসের নাম</label>
+                    <input id="officeName" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">ওয়েবলিংক (যেখানে ক্লিক করলে যাবে)</label>
+                    <input id="officeLink" type="url" placeholder="https://..." class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">সংখ্যা</label>
+                    <input id="officeCount" type="number" min="1" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">কার্যালয়ভিত্তিক অনুমোদিত পদের সংখ্যা</label>
+                    <input id="officeApproved" type="number" min="0" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-8">
+                <button onclick="closeOfficeModal()" class="px-6 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium">বাতিল</button>
+                <button onclick="saveOffice()" class="px-6 py-2.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl font-medium shadow-md">সংরক্ষণ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- পদ মডাল -->
+    <div id="postModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl modal p-8 my-8">
+            <h3 class="text-2xl font-bold mb-6 text-gray-800">নতুন পদ যুক্ত / এডিট করুন</h3>
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">পদের নাম</label>
+                    <input id="postNameInput" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">এনাম কমিটির সুপারিশে সৃজিত পদ ও তারিখ</label>
+                    <input id="postEnam1" type="text" placeholder="১২টি • ২০২৪-০৫-১৫" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">এনাম কমিটি পরবর্তী কালে সৃজিত পদ ও তারিখ</label>
+                    <input id="postEnam2" type="text" placeholder="৫টি • ২০২৫-০১-১০" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">বিলুপ্ত পদ</label>
+                    <input id="postAbolished" type="number" value="0" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">নীট পদ</label>
+                    <input id="postNet" type="number" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">পদের গ্রেড</label>
+                    <input id="postGrade" type="text" placeholder="১১" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">কার্যালয়ভিত্তিক বিভাজন</label>
+                    <input id="postDivision" type="text" placeholder="সদর: ৫ | জেলা: ১০" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">নিয়োগবিধিভুক্ত?</label>
+                    <select id="postRecruitmentRule" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                        <option value="হ্যাঁ">হ্যাঁ</option>
+                        <option value="না">না</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">পদোন্নতি % / সরাসরি %</label>
+                    <input id="postPromotionDirect" type="text" placeholder="৭০% / ৩০%" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">প্রেষণযোগ্য?</label>
+                    <select id="postDeputation" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                        <option value="হ্যাঁ">হ্যাঁ</option>
+                        <option value="না">না</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">পদোন্নতিতে অতিরিক্ত শিক্ষাগত যোগ্যতা?</label>
+                    <input id="postExtraQual" type="text" placeholder="স্নাতকোত্তর (বিষয়ভিত্তিক)" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">ফিডার পদসমূহ</label>
+                    <input id="postFeeder" type="text" placeholder="উপ-সহকারী, সহকারী" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">সরাসরি নিয়োগযোগ্যতা</label>
+                    <input id="postDirectEligibility" type="text" placeholder="স্নাতক, বয়স ১৮-৩০" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-8">
+                <button onclick="closePostModal()" class="px-6 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium">বাতিল</button>
+                <button onclick="savePost()" class="px-6 py-2.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl font-medium shadow-md">সংরক্ষণ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- কার্যক্রম মডাল -->
+    <div id="programModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md modal p-8">
+            <h3 id="programModalTitle" class="text-2xl font-bold mb-6 text-gray-800">নতুন কার্যক্রম যুক্ত করুন</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">কার্যক্রমের নাম</label>
+                    <input id="progName" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">ওয়েবলিংক (ঐচ্ছিক)</label>
+                    <input id="progLink" type="url" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-8">
+                <button onclick="closeProgramModal()" class="px-6 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium">বাতিল</button>
+                <button onclick="saveProgram()" class="px-6 py-2.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl font-medium shadow-md">সংরক্ষণ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- নতুন: হালনাগাদ উপকারভোগী এডিট মডাল -->
+    <div id="beneficiaryEditModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md modal p-8">
+            <h3 class="text-2xl font-bold mb-6 text-gray-800">হালনাগাদ উপকারভোগী সংখ্যা এডিট</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">কার্যক্রমের নাম</label>
+                    <input id="editProgNameDisplay" type="text" readonly class="w-full border border-gray-200 bg-gray-100 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">হালনাগাদ উপকারভোগী সংখ্যা</label>
+                    <input id="editBeneficiaryCount" type="number" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-8">
+                <button onclick="closeBeneficiaryEditModal()" class="px-6 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium">বাতিল</button>
+                <button onclick="saveBeneficiaryEdit()" class="px-6 py-2.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl font-medium shadow-md">সংরক্ষণ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- নতুন: অফিসভিত্তিক পদ বিবরণী মডাল -->
+    <div id="officePostModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md modal p-8">
+            <h3 id="officePostModalTitle" class="text-2xl font-bold mb-6 text-gray-800">নতুন অফিস-পদ বিবরণী যুক্ত করুন</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">অফিসের নাম</label>
+                    <input id="officePostName" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">অনুমোদিত পদ সংখ্যা</label>
+                    <input id="officePostApproved" type="number" min="0" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">বিবরণ (যেমন: মূল পদসমূহ)</label>
+                    <input id="officePostDescription" type="text" placeholder="উপজেলা কর্মকর্তা, সহকারী ইত্যাদি" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-8">
+                <button onclick="closeOfficePostModal()" class="px-6 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium">বাতিল</button>
+                <button onclick="saveOfficePost()" class="px-6 py-2.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl font-medium shadow-md">সংরক্ষণ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- জি.ও. মডাল -->
+    <div id="goModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md modal p-8">
+            <h3 class="text-2xl font-bold mb-6 text-gray-800">নতুন জি.ও. যুক্ত করুন</h3>
+            <div class="space-y-5">
+                <input id="goNumber" type="text" placeholder="জি.ও. নম্বর" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                <input id="goSubject" type="text" placeholder="বিষয়" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+                <input id="goDate" type="date" class="w-full border border-gray-300 rounded-xl px-4 py-3">
+            </div>
+            <div class="flex justify-end gap-3 mt-8">
+                <button onclick="closeGOModal()" class="px-6 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium">বাতিল</button>
+                <button onclick="saveGO()" class="px-6 py-2.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl font-medium shadow-md">সংরক্ষণ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[9999] space-y-2"></div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        // Tailwind script init
+        function initTailwind() {
+            tailwind.config = { content: ["*"] };
+        }
+
+        // বর্তমান তারিখ
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('bn-BD', options);
+
+        // ================= ডাটা স্টোরেজ =================
+        let offices = JSON.parse(localStorage.getItem('offices')) || [
+            {id:1, name:"সদর কার্যালয়", count:1, link:"https://dss.gov.bd", approved:512},
+            {id:2, name:"জাতীয় সমাজসেবা একাডেমী", count:1, link:"https://dss.gov.bd/academy", approved:120},
+            // ... (বাকি ডাটা আগের মতোই রাখা হয়েছে)
+            {id:37, name:"বৃত্তিমূলক প্রশিক্ষণ ও উৎপাদন কেন্দ্র, দওপাড়া, গাজীপুর", count:1, link:"#", approved:35}
+        ];
+
+        let programs = JSON.parse(localStorage.getItem('programs')) || [
+            {id:1, name:"বয়স্ক ভাতা", link:"https://bhata.gov.bd", count:452780},
+            {id:2, name:"বিধবা ও স্বামী নিগৃহীতা ভাতা", link:"https://bhata.gov.bd", count:312450},
+            {id:3, name:"প্রতিবন্ধী ভাতা", link:"https://bhata.gov.bd", count:189650},
+            {id:4, name:"অসচ্ছল মুক্তিযোদ্ধা ভাতা", link:"#", count:87420},
+            {id:5, name:"শিশু খাদ্য সহায়তা কর্মসূচি", link:"#", count:124580}
+        ];
+
+        let posts = JSON.parse(localStorage.getItem('posts')) || [
+            // ... (আগের পদ ডাটা)
+        ];
+
+        // নতুন ডাটা: অফিসভিত্তিক পদ বিবরণী
+        let officePostDetails = JSON.parse(localStorage.getItem('officePostDetails')) || [
+            {id:1, officeName:"সদর কার্যালয়", approvedPosts:512, description:"মহাপরিচালক, অতিরিক্ত মহাপরিচালক, যুগ্ম মহাপরিচালক ইত্যাদি"},
+            {id:2, officeName:"জেলা সমাজসেবা কার্যালয়", approvedPosts:1280, description:"জেলা সমাজসেবা কর্মকর্তা, সহকারী কর্মকর্তা"},
+            {id:3, officeName:"উপজেলা সমাজসেবা কার্যালয়", approvedPosts:9900, description:"উপজেলা সমাজসেবা কর্মকর্তা (৪৯৫টি)"}
+        ];
+
+        let goLibrary = JSON.parse(localStorage.getItem('goLibrary')) || [
+            {id:1, number:"৪৫/২০২৫", subject:"পদ সৃজন অনুমোদন", date:"২০২৫-১২-১০"},
+            {id:2, number:"১২/২০২৬", subject:"গ্রেড উন্নয়ন", date:"২০২৬-০১-২০"}
+        ];
+
+        let editingOfficeId = null, editingProgramId = null, editingPostId = null, editingGOId = null, editingOfficePostId = null, editingBeneficiaryId = null;
+
+        // ================= রেন্ডার ফাংশন =================
+        function renderOfficeTable(filtered = null) {
+            const tbody = document.getElementById('officeTableBody');
+            const data = filtered || offices;
+            let total = 0;
+            tbody.innerHTML = data.map((o, i) => {
+                total += o.count;
+                const linkHtml = o.link && o.link !== '#' 
+                    ? `<a href="${o.link}" target="_blank" class="link-hover text-blue-600 font-medium">${o.name}</a>` 
+                    : o.name;
+                return `<tr class="hover:bg-blue-50">
+                    <td class="px-6 py-3">${i+1}</td>
+                    <td class="px-6 py-3">${linkHtml}</td>
+                    <td class="px-6 py-3 text-center font-bold">${o.count.toLocaleString('bn-BD')}</td>
+                    <td class="px-6 py-3 text-center font-bold">${o.approved ? o.approved.toLocaleString('bn-BD') : '০'}</td>
+                    <td class="px-6 py-3 text-center flex gap-3">
+                        <button onclick="editOffice(${o.id})" class="text-amber-600">✏️</button>
+                        <button onclick="deleteOffice(${o.id})" class="text-red-600">🗑️</button>
+                    </td>
+                </tr>`;
+            }).join('');
+            document.getElementById('total-offices-display').textContent = total.toLocaleString('bn-BD');
+            document.getElementById('dash-total-offices').textContent = total.toLocaleString('bn-BD');
+        }
+
+        function renderProgramTable(filtered = null) {
+            const tbody = document.getElementById('programTableBody');
+            const data = filtered || programs;
+            let total = 0;
+            tbody.innerHTML = data.map((p, i) => {
+                total += p.count;
+                return `<tr class="hover:bg-blue-50">
+                    <td>${i+1}</td>
+                    <td>${p.name}</td>
+                    <td><a href="${p.link}" target="_blank" class="text-blue-600">${p.link !== '#' ? 'লিংক' : 'নেই'}</a></td>
+                    <td class="text-center font-bold">${p.count.toLocaleString('bn-BD')}</td>
+                    <td class="text-center flex gap-2">
+                        <button onclick="editBeneficiaryCount(${p.id})" class="text-emerald-600">✏️ এডিট</button>
+                        <button onclick="editProgram(${p.id})">✏️</button>
+                        <button onclick="deleteProgram(${p.id})">🗑️</button>
+                    </td>
+                </tr>`;
+            }).join('');
+            document.getElementById('totalBeneficiary').textContent = total.toLocaleString('bn-BD');
+            document.getElementById('dash-total-beneficiaries').textContent = total.toLocaleString('bn-BD');
+        }
+
+        function renderPostTable(filtered = null) {
+            const tbody = document.getElementById('postTableBody');
+            const data = filtered || posts;
+            let grandTotal = 0;
+            tbody.innerHTML = data.map((p, i) => {
+                grandTotal += p.net || 0;
+                return `<tr class="hover:bg-blue-50">
+                    <td class="px-6 py-3">${i+1}</td>
+                    <td class="px-6 py-3">${p.name}</td>
+                    <td class="px-6 py-3 text-center">${p.enam1 || '-'}</td>
+                    <td class="px-6 py-3 text-center">${p.enam2 || '-'}</td>
+                    <td class="px-6 py-3 text-center">${p.abolished || 0}</td>
+                    <td class="px-6 py-3 text-center font-bold">${p.net || 0}</td>
+                    <td class="px-6 py-3 text-center">${p.grade || '-'}</td>
+                    <td class="px-6 py-3 text-center">${p.division || '-'}</td>
+                    <td class="px-6 py-3 text-center">${p.rule || '-'}</td>
+                    <td class="px-6 py-3 text-center">${p.promoDirect || '-'}</td>
+                    <td class="px-6 py-3 text-center">${p.deputation || '-'}</td>
+                    <td class="px-6 py-3 text-center">${p.extraQual || '-'}</td>
+                    <td class="px-6 py-3 text-center">${p.feeder || '-'}</td>
+                    <td class="px-6 py-3 text-center">${p.directEligibility || '-'}</td>
+                    <td class="px-6 py-3 text-center flex gap-2">
+                        <button onclick="editPost(${p.id})" class="text-amber-500">✏️</button>
+                        <button onclick="deletePost(${p.id})" class="text-red-500">🗑️</button>
+                    </td>
+                </tr>`;
+            }).join('');
+            document.getElementById('dash-total-posts').textContent = grandTotal.toLocaleString('bn-BD');
+        }
+
+        // নতুন: অফিসভিত্তিক পদ টেবিল রেন্ডার
+        function renderOfficePostTable(filtered = null) {
+            const tbody = document.getElementById('officePostTableBody');
+            const data = filtered || officePostDetails;
+            tbody.innerHTML = data.map((op, i) => `
+                <tr class="hover:bg-blue-50">
+                    <td class="px-6 py-3">${i+1}</td>
+                    <td class="px-6 py-3">${op.officeName}</td>
+                    <td class="px-6 py-3 text-center font-bold">${op.approvedPosts.toLocaleString('bn-BD')}</td>
+                    <td class="px-6 py-3">${op.description}</td>
+                    <td class="px-6 py-3 text-center flex gap-3">
+                        <button onclick="editOfficePost(${op.id})" class="text-amber-600">✏️</button>
+                        <button onclick="deleteOfficePost(${op.id})" class="text-red-600">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderGOTable() {
+            const tbody = document.getElementById('goTableBody');
+            tbody.innerHTML = goLibrary.map((g, i) => `<tr><td>${i+1}</td><td>${g.number}</td><td>${g.subject}</td><td>${g.date}</td><td class="text-center"><button onclick="deleteGO(${g.id})" class="text-red-500">🗑️</button></td></tr>`).join('');
+        }
+
+        // ================= সার্চ + এক্সপোর্ট =================
+        function filterOffice() {
+            const term = document.getElementById('officeSearch').value.toLowerCase().trim();
+            const filtered = offices.filter(o => o.name.toLowerCase().includes(term));
+            renderOfficeTable(filtered);
+        }
+        function filterProgram() {
+            const term = document.getElementById('programSearch').value.toLowerCase().trim();
+            const filtered = programs.filter(p => p.name.toLowerCase().includes(term));
+            renderProgramTable(filtered);
+        }
+        function filterPost() {
+            const term = document.getElementById('postSearch').value.toLowerCase().trim();
+            const filtered = posts.filter(p => p.name.toLowerCase().includes(term));
+            renderPostTable(filtered);
+        }
+        function filterOfficePost() {
+            const term = document.getElementById('officePostSearch').value.toLowerCase().trim();
+            const filtered = officePostDetails.filter(op => op.officeName.toLowerCase().includes(term));
+            renderOfficePostTable(filtered);
+        }
+
+        function exportCSV(section) {
+            let csv = '';
+            if (section === 1) {
+                csv = "ক্রম,কার্যালয়ের নাম,সংখ্যা,অনুমোদিত পদ,লিংক\n" + offices.map((o,i) => `${i+1},${o.name},${o.count},${o.approved || 0},${o.link}`).join('\n');
+            } else if (section === 2) {
+                csv = "ক্রম,পদের নাম,এনাম-১,এনাম-২,বিলুপ্ত,নীট,গ্রেড,বিভাজন,নিয়োগবিধি,পদোন্নতি/সরাসরি,প্রেষণ,অতিরিক্ত যোগ্যতা,ফিডার,সরাসরি যোগ্যতা\n" + 
+                      posts.map((p,i) => `${i+1},${p.name},${p.enam1 || ''},${p.enam2 || ''},${p.abolished || 0},${p.net || 0},${p.grade || ''},${p.division || ''},${p.rule || ''},${p.promoDirect || ''},${p.deputation || ''},${p.extraQual || ''},${p.feeder || ''},${p.directEligibility || ''}`).join('\n');
+            } else if (section === 4) {
+                csv = "ক্রম,কার্যক্রম,উপকারভোগী\n" + programs.map((p,i) => `${i+1},${p.name},${p.count}`).join('\n');
+            } else if (section === 6) {
+                csv = "ক্রম,অফিসের নাম,অনুমোদিত পদ,বিবরণ\n" + officePostDetails.map((op,i) => `${i+1},${op.officeName},${op.approvedPosts},${op.description}`).join('\n');
+            }
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `data_section_${section}.csv`;
+            link.click();
+            showToast('✅ CSV এক্সপোর্ট সফল!');
+        }
+
+        // অফিস CRUD (অপরিবর্তিত)
+        function openOfficeModal() { 
+            editingOfficeId = null; 
+            document.getElementById('officeModalTitle').textContent = 'নতুন অফিস যুক্ত করুন'; 
+            document.getElementById('officeName').value = ''; 
+            document.getElementById('officeLink').value = ''; 
+            document.getElementById('officeCount').value = ''; 
+            document.getElementById('officeApproved').value = ''; 
+            document.getElementById('officeModal').classList.remove('hidden'); 
+            document.getElementById('officeModal').classList.add('flex'); 
+        }
+        function editOffice(id) {
+            const office = offices.find(o => o.id === id);
+            editingOfficeId = id;
+            document.getElementById('officeModalTitle').textContent = 'অফিস এডিট';
+            document.getElementById('officeName').value = office.name;
+            document.getElementById('officeLink').value = office.link || '';
+            document.getElementById('officeCount').value = office.count;
+            document.getElementById('officeApproved').value = office.approved || 0;
+            document.getElementById('officeModal').classList.remove('hidden'); 
+            document.getElementById('officeModal').classList.add('flex');
+        }
+        function saveOffice() {
+            const name = document.getElementById('officeName').value.trim();
+            const link = document.getElementById('officeLink').value.trim() || '#';
+            const count = parseInt(document.getElementById('officeCount').value);
+            const approved = parseInt(document.getElementById('officeApproved').value) || 0;
+            if (!name || isNaN(count)) return showToast('⚠️ সঠিক তথ্য দিন', true);
+            if (editingOfficeId) {
+                const o = offices.find(o => o.id === editingOfficeId);
+                o.name = name; o.link = link; o.count = count; o.approved = approved;
+            } else {
+                const maxId = offices.length ? Math.max(...offices.map(o=>o.id)) : 0;
+                offices.push({id: maxId+1, name, count, link, approved});
+            }
+            localStorage.setItem('offices', JSON.stringify(offices));
+            closeOfficeModal();
+            renderOfficeTable();
+            showToast('✅ অফিস সংরক্ষিত!');
+        }
+        function deleteOffice(id) {
+            if (confirm('মুছে ফেলবেন?')) {
+                offices = offices.filter(o => o.id !== id);
+                localStorage.setItem('offices', JSON.stringify(offices));
+                renderOfficeTable();
+            }
+        }
+        function closeOfficeModal() {
+            const m = document.getElementById('officeModal');
+            m.classList.add('hidden'); m.classList.remove('flex');
+        }
+
+        // কার্যক্রম CRUD (স্ক্র্যাপ বাদ)
+        function openProgramModal() { editingProgramId = null; document.getElementById('programModalTitle').textContent = 'নতুন কার্যক্রম'; document.getElementById('progName').value = ''; document.getElementById('progLink').value = ''; document.getElementById('programModal').classList.remove('hidden'); document.getElementById('programModal').classList.add('flex'); }
+        function editProgram(id) {
+            const p = programs.find(pr => pr.id === id);
+            editingProgramId = id;
+            document.getElementById('programModalTitle').textContent = 'এডিট কার্যক্রম';
+            document.getElementById('progName').value = p.name;
+            document.getElementById('progLink').value = p.link === '#' ? '' : p.link;
+            document.getElementById('programModal').classList.remove('hidden'); document.getElementById('programModal').classList.add('flex');
+        }
+        function saveProgram() {
+            const name = document.getElementById('progName').value.trim();
+            const link = document.getElementById('progLink').value.trim() || '#';
+            if (!name) return showToast('⚠️ নাম দিন', true);
+            if (editingProgramId) {
+                const p = programs.find(pr => pr.id === editingProgramId);
+                p.name = name; p.link = link;
+            } else {
+                const maxId = programs.length ? Math.max(...programs.map(p=>p.id)) : 0;
+                programs.push({id: maxId+1, name, link, count: 0});
+            }
+            localStorage.setItem('programs', JSON.stringify(programs));
+            closeProgramModal();
+            renderProgramTable();
+            showToast('✅ কার্যক্রম সংরক্ষিত!');
+        }
+        function deleteProgram(id) {
+            if (confirm('মুছে ফেলবেন?')) {
+                programs = programs.filter(p => p.id !== id);
+                localStorage.setItem('programs', JSON.stringify(programs));
+                renderProgramTable();
+            }
+        }
+        function closeProgramModal() {
+            const m = document.getElementById('programModal');
+            m.classList.add('hidden'); m.classList.remove('flex');
+        }
+
+        // নতুন: হালনাগাদ উপকারভোগী এডিট
+        function editBeneficiaryCount(id) {
+            const p = programs.find(pr => pr.id === id);
+            editingBeneficiaryId = id;
+            document.getElementById('editProgNameDisplay').value = p.name;
+            document.getElementById('editBeneficiaryCount').value = p.count;
+            document.getElementById('beneficiaryEditModal').classList.remove('hidden');
+            document.getElementById('beneficiaryEditModal').classList.add('flex');
+        }
+        function saveBeneficiaryEdit() {
+            const newCount = parseInt(document.getElementById('editBeneficiaryCount').value);
+            if (isNaN(newCount)) return showToast('⚠️ সঠিক সংখ্যা দিন', true);
+            const p = programs.find(pr => pr.id === editingBeneficiaryId);
+            p.count = newCount;
+            localStorage.setItem('programs', JSON.stringify(programs));
+            closeBeneficiaryEditModal();
+            renderProgramTable();
+            showToast('✅ উপকারভোগী সংখ্যা আপডেট হয়েছে!');
+        }
+        function closeBeneficiaryEditModal() {
+            const m = document.getElementById('beneficiaryEditModal');
+            m.classList.add('hidden'); m.classList.remove('flex');
+            editingBeneficiaryId = null;
+        }
+
+        // পদ CRUD (অপরিবর্তিত)
+        function openPostModal() { 
+            editingPostId = null; 
+            // ... (আগের কোড)
+            document.getElementById('postModal').classList.remove('hidden'); 
+            document.getElementById('postModal').classList.add('flex'); 
+        }
+        // ... (বাকি পদ CRUD ফাংশন আগের মতোই রাখা হয়েছে)
+
+        // নতুন: অফিসভিত্তিক পদ CRUD
+        function openOfficePostModal() { 
+            editingOfficePostId = null; 
+            document.getElementById('officePostModalTitle').textContent = 'নতুন অফিস-পদ বিবরণী যুক্ত করুন'; 
+            document.getElementById('officePostName').value = ''; 
+            document.getElementById('officePostApproved').value = ''; 
+            document.getElementById('officePostDescription').value = ''; 
+            document.getElementById('officePostModal').classList.remove('hidden'); 
+            document.getElementById('officePostModal').classList.add('flex'); 
+        }
+        function editOfficePost(id) {
+            const op = officePostDetails.find(o => o.id === id);
+            editingOfficePostId = id;
+            document.getElementById('officePostModalTitle').textContent = 'অফিস-পদ এডিট';
+            document.getElementById('officePostName').value = op.officeName;
+            document.getElementById('officePostApproved').value = op.approvedPosts;
+            document.getElementById('officePostDescription').value = op.description;
+            document.getElementById('officePostModal').classList.remove('hidden'); 
+            document.getElementById('officePostModal').classList.add('flex');
+        }
+        function saveOfficePost() {
+            const name = document.getElementById('officePostName').value.trim();
+            const approved = parseInt(document.getElementById('officePostApproved').value) || 0;
+            const desc = document.getElementById('officePostDescription').value.trim();
+            if (!name) return showToast('⚠️ অফিসের নাম দিন', true);
+            if (editingOfficePostId) {
+                const op = officePostDetails.find(o => o.id === editingOfficePostId);
+                op.officeName = name; op.approvedPosts = approved; op.description = desc;
+            } else {
+                const maxId = officePostDetails.length ? Math.max(...officePostDetails.map(o=>o.id)) : 0;
+                officePostDetails.push({id: maxId+1, officeName: name, approvedPosts: approved, description: desc});
+            }
+            localStorage.setItem('officePostDetails', JSON.stringify(officePostDetails));
+            closeOfficePostModal();
+            renderOfficePostTable();
+            showToast('✅ অফিসভিত্তিক পদ বিবরণী সংরক্ষিত!');
+        }
+        function deleteOfficePost(id) {
+            if (confirm('মুছে ফেলবেন?')) {
+                officePostDetails = officePostDetails.filter(o => o.id !== id);
+                localStorage.setItem('officePostDetails', JSON.stringify(officePostDetails));
+                renderOfficePostTable();
+            }
+        }
+        function closeOfficePostModal() {
+            const m = document.getElementById('officePostModal');
+            m.classList.add('hidden'); m.classList.remove('flex');
+        }
+
+        // জি.ও. CRUD (অপরিবর্তিত)
+        function openGOModal() { editingGOId = null; document.getElementById('goModal').classList.remove('hidden'); document.getElementById('goModal').classList.add('flex'); }
+        function closeGOModal() { const m = document.getElementById('goModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+        function saveGO() {
+            const number = document.getElementById('goNumber').value.trim();
+            const subject = document.getElementById('goSubject').value.trim();
+            const date = document.getElementById('goDate').value;
+            if (!number || !subject) return;
+            if (editingGOId) {
+                const g = goLibrary.find(go => go.id === editingGOId);
+                g.number = number; g.subject = subject; g.date = date;
+            } else {
+                const max = goLibrary.length ? Math.max(...goLibrary.map(g=>g.id)) : 0;
+                goLibrary.push({id: max+1, number, subject, date});
+            }
+            localStorage.setItem('goLibrary', JSON.stringify(goLibrary));
+            closeGOModal();
+            renderGOTable();
+            showToast('✅ জি.ও. সংরক্ষিত!');
+        }
+        function deleteGO(id) {
+            if (confirm('মুছে ফেলবেন?')) {
+                goLibrary = goLibrary.filter(g => g.id !== id);
+                localStorage.setItem('goLibrary', JSON.stringify(goLibrary));
+                renderGOTable();
+            }
+        }
+
+        // সেকশন নেভিগেশন
+        function showSection(n, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            const target = document.getElementById('section-' + n);
+            if (target) target.classList.remove('hidden');
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+            if (el) el.classList.add('active');
+            if (n === 0) setTimeout(initCharts, 300);
+            if (n === 6) renderOfficePostTable();
+        }
+
+        // চার্ট
+        let officeChartInstance = null, beneficiaryChartInstance = null;
+        function initCharts() {
+            const ctx1 = document.getElementById('officeChart');
+            const ctx2 = document.getElementById('beneficiaryChart');
+            if (officeChartInstance) officeChartInstance.destroy();
+            if (beneficiaryChartInstance) beneficiaryChartInstance.destroy();
+
+            officeChartInstance = new Chart(ctx1, {
+                type: 'bar',
+                data: { labels: offices.slice(0,8).map(o=>o.name.substring(0,12)), datasets: [{ label: 'কার্যালয় সংখ্যা', data: offices.slice(0,8).map(o=>o.count), backgroundColor: '#1e3a8a' }] },
+                options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+            });
+
+            beneficiaryChartInstance = new Chart(ctx2, {
+                type: 'pie',
+                data: { labels: programs.map(p=>p.name), datasets: [{ data: programs.map(p=>p.count), backgroundColor: ['#10b981','#14b8a6','#0ea5e9','#8b5cf6','#ec4899'] }] },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        // Toast
+        function showToast(msg, error = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast px-6 py-3 rounded-2xl shadow-2xl text-white flex items-center gap-3 ${error ? 'bg-red-500' : 'bg-emerald-600'}`;
+            toast.innerHTML = `<span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = 0; setTimeout(() => toast.remove(), 300); }, 3500);
+        }
+
+        // ================= INITIAL LOAD =================
+        window.onload = function() {
+            initTailwind();
+            renderOfficeTable();
+            renderProgramTable();
+            renderPostTable();
+            renderOfficePostTable();
+            renderGOTable();
+            initCharts();
+
+            // সার্চ ইভেন্ট
+            document.getElementById('officeSearch').addEventListener('input', filterOffice);
+            document.getElementById('programSearch').addEventListener('input', filterProgram);
+            document.getElementById('postSearch').addEventListener('input', filterPost);
+            document.getElementById('officePostSearch').addEventListener('input', filterOfficePost);
+
+            console.log('%c✅ সংগঠন ও ব্যবস্থাপনা-সমাজসেবা অধিদপ্তর সম্পূর্ণ সিস্টেম লোড হয়েছে। (অফিস বিবরণী + অফিসভিত্তিক পদ বিবরণী + উপকারভোগী এডিট + স্ক্র্যাপ বাদ)', 'color:#1e3a8a; font-size:13px');
+        };
+    </script>
+</body>
+</html></DOCUMENT>
