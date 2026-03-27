@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>আউটসোর্সিং প্রস্তাবনা জেনারেটর</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Kalpurush', Arial, sans-serif; background-color: #e9ecef; }
+        .app-container { max-width: 1100px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h2, h4 { color: #0d6efd; text-align: center; font-weight: bold; }
+        
+        .inst-block { background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 2px solid #0d6efd; margin-bottom: 25px; position: relative;}
+        .inst-header { font-size: 18px; font-weight: bold; color: #0d6efd; margin-bottom: 15px; border-bottom: 2px solid #dee2e6; padding-bottom: 10px;}
+        .remove-inst-btn { position: absolute; top: 15px; right: 20px; }
+        
+        .service-item, .toe-item, .prev-out-item { background-color: #fff; padding: 15px; border-radius: 5px; border: 1px dashed #6c757d; margin-bottom: 10px; position: relative;}
+        .remove-btn { position: absolute; top: 10px; right: 10px; }
+        
+        .summary-box { background-color: #d1e7dd; padding: 15px; border-radius: 5px; border-left: 5px solid #0f5132; margin-bottom: 20px;}
+        label { font-weight: bold; color: #333; margin-top: 5px; font-size: 14px;}
+
+        /* Organogram Tree Styles */
+        .tree-container { text-align: center; margin-bottom: 50px; page-break-inside: avoid; font-family: 'Kalpurush', Arial, sans-serif;}
+        .tree-root-wrapper { position: relative; display: inline-block; padding-bottom: 20px; }
+        .tree-root-wrapper::after { content: ''; position: absolute; bottom: 0; left: 50%; border-left: 2px solid #333; height: 20px; transform: translateX(-50%); }
+        .tree-root { display: inline-block; padding: 10px 20px; border: 2px solid #333; border-radius: 6px; font-weight: bold; font-size: 18px; background: #f8f9fa; z-index: 2; position: relative; }
+        
+        .tree-branches { display: flex; justify-content: center; align-items: flex-start; margin: 0 auto; width: 100%; max-width: 800px; }
+        .tree-branch { position: relative; padding-top: 20px; flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .tree-branch::after { content: ''; position: absolute; top: 0; right: 0; left: 0; border-top: 2px solid #333; }
+        .tree-branch:first-child::after { left: 50%; }
+        .tree-branch:last-child::after { right: 50%; }
+        .tree-branch:only-child::after { display: none; }
+        .tree-branch::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #333; height: 20px; transform: translateX(-50%); }
+        
+        .tree-node { border: 2px solid #333; padding: 8px 12px; border-radius: 5px; background: #fff; margin-bottom: 15px; position: relative; width: 90%; max-width: 250px; text-align: center; font-size: 15px; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .branch-title { background: #e9ecef; font-weight: bold; }
+        .node-blue { border-color: #0d6efd !important; color: #0d6efd !important; font-weight: bold; box-shadow: 0 2px 4px rgba(13,110,253,0.1); }
+        .branch-title-blue { color: #0d6efd !important; border-color: #0d6efd !important; background: #f0f7ff; }
+        .tree-node:not(:last-child)::after { content: ''; position: absolute; bottom: -17px; left: 50%; border-left: 2px solid #333; height: 15px; transform: translateX(-50%); z-index: 1;}
+        .node-blue:not(:last-child)::after { border-left: 2px solid #0d6efd !important; }
+        .branch-title-blue::after { border-left: 2px solid #0d6efd !important; }
+        .tree-branch-blue::before { border-left: 2px solid #0d6efd !important; }
+        
+        .bld-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
+
+        /* Official Document Styles */
+        .doc-body { font-size: 16px; line-height: 1.6; text-align: justify; color: #000; padding: 20px 40px; }
+        .doc-title { font-weight: bold; text-align: center; text-decoration: underline; margin-bottom: 15px; font-size: 18px;}
+        .doc-para { margin-bottom: 15px; }
+
+        /* Note Sheet specific margins */
+        .note-sheet { padding-top: 1in; padding-right: 1.5in; padding-left: 1in; }
+
+        /* Page Break Style For Screen */
+        .page-break {
+            display: block;
+            width: 100%;
+            text-align: center;
+            border-bottom: 2px dashed #0d6efd;
+            margin: 40px 0;
+            position: relative;
+        }
+        .page-break::before {
+            content: "🖨️ নতুন পৃষ্ঠা (প্রিন্ট করার সময় এই অংশ থেকে আলাদা পেজে আসবে)";
+            background: #e9ecef;
+            padding: 5px 15px;
+            color: #0d6efd;
+            font-weight: bold;
+            border-radius: 10px;
+            position: relative;
+            top: 15px;
+        }
+
+        /* Print Styles */
+        @media print {
+            body { background-color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;}
+            .no-print { display: none !important; }
+            .app-container { box-shadow: none; margin: 0; padding: 0; max-width: 100%; border: none;}
+            
+            /* Table Border Fix for Pagination */
+            table.table-bordered { font-size: 14px; width: 100%; border-collapse: collapse !important; border: 1px solid black !important; page-break-inside: auto; }
+            table.table-bordered tr { page-break-inside: avoid !important; page-break-after: auto; }
+            table.table-bordered th, table.table-bordered td { border: 1px solid black !important; padding: 8px; }
+            
+            .no-border-table, .no-border-table th, .no-border-table td, .no-border-table tr { border: none !important; padding: 5px; }
+            
+            [contenteditable] { outline: none !important; border: none !important; box-shadow: none !important; background: transparent !important;}
+            
+            .print-header { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 18px; }
+            .signature-area { margin-top: 50px; text-align: right; padding-right: 50px; }
+            
+            .toe-print-table, .prev-out-print-table { width: 100%; margin-top: 5px; margin-bottom: 10px; border-collapse: collapse !important; page-break-inside: auto;}
+            .toe-print-table tr, .prev-out-print-table tr { page-break-inside: avoid !important; }
+            .toe-print-table th, .toe-print-table td, .prev-out-print-table th, .prev-out-print-table td { border: 1px solid black !important; padding: 4px; text-align: center;}
+            .toe-print-table th, .prev-out-print-table th { background-color: #f2f2f2 !important; }
+            
+            /* Guaranteed Page Break for Print */
+            .page-break { 
+                page-break-before: always !important; 
+                break-before: page !important; 
+                display: block !important; 
+                border: none !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                height: 0 !important; 
+            }
+            .page-break::before { display: none !important; content: none !important; }
+            
+            .node-blue, .branch-title-blue { color: #0000FF !important; border-color: #0000FF !important; }
+            .tree-node { box-shadow: none !important; border: 2px solid #000 !important; }
+            .node-blue.tree-node { border: 2px solid #0000FF !important; }
+            .tree-root { border: 2px solid #000 !important; }
+            .tree-root-wrapper::after, .tree-branch::before, .tree-branch::after, .tree-node:not(:last-child)::after { border-color: #000 !important; }
+            .tree-branch-blue::before, .node-blue:not(:last-child)::after, .branch-title-blue::after { border-color: #0000FF !important; }
+            
+            .note-sheet { padding-top: 1in !important; padding-right: 1.5in !important; padding-left: 1in !important; }
+            .doc-body:not(.note-sheet) { padding: 0; }
+        }
+        
+        [contenteditable="true"] { transition: background 0.3s; }
+        [contenteditable="true"]:hover { background-color: #fef1e6; outline: 1px dashed #fd7e14; cursor: text;}
+        [contenteditable="true"]:focus { background-color: #fff3cd; outline: 2px solid #ffc107; }
+    </style>
+</head>
+<body>
+
+<div class="container app-container">
+    <div class="no-print">
+        <h2>আউটসোর্সিং প্রস্তাবনা জেনারেটর</h2>
+        <hr>
+
+        <form id="proposalForm">
+            <!-- Letter & Note Meta Data -->
+            <div class="mb-4 bg-info bg-opacity-10 p-3 border border-info rounded">
+                <h5 class="text-primary fw-bold border-bottom border-info pb-2 mb-3">দাপ্তরিক পত্র ও নোটের তথ্যাদি</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">স্মারক নম্বর</label>
+                        <input type="text" id="meta_memo" class="form-control" value="৪১.০১.০০০০.০৩৪.১১.০১৫.২৬.১২৩৪">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">বাংলা তারিখ</label>
+                        <input type="text" id="meta_bn_date" class="form-control" value="০৫ চৈত্র ১৪৩২ বঙ্গাব্দ">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">ইংরেজি তারিখ</label>
+                        <input type="date" id="meta_en_date" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">প্রেরকের নাম, পদবি ও ইমেইল</label>
+                        <textarea id="meta_sender" class="form-control" rows="3">শাহ মোহাম্মদ মাহবুব&#10;মহাপরিচালক (অতিরিক্ত সচিব)&#10;dg@dss.gov.bd</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">প্রাপকের পদবি ও ঠিকানা</label>
+                        <textarea id="meta_receiver" class="form-control" rows="3">সচিব&#10;সমাজকল্যাণ মন্ত্রণালয়&#10;বাংলাদেশ সচিবালয়, ঢাকা।</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4 bg-light p-3 border rounded">
+                <label class="form-label text-dark fw-bold">০১. প্রধান প্রস্তাবকারী প্রতিষ্ঠান ও মন্ত্রণালয়</label>
+                <input type="text" id="q1_main" class="form-control fw-bold" value="সমাজসেবা অধিদপ্তর, সমাজকল্যাণ মন্ত্রণালয়" readonly>
+            </div>
+
+            <!-- Institutions Container -->
+            <div id="institutionsContainer"></div>
+            
+            <div class="text-center mb-4">
+                <button type="button" class="btn btn-primary btn-lg shadow" onclick="addInstitution()">+ নতুন প্রতিষ্ঠান/অফিস যুক্ত করুন</button>
+            </div>
+
+            <!-- Auto Generated Summary -->
+            <div class="summary-box">
+                <h5 class="fw-bold text-success mb-2">স্বয়ংক্রিয় আর্থিক ও পদের সারাংশ:</h5>
+                <div id="liveSummaryText" class="text-dark small lh-lg"></div>
+            </div>
+
+            <textarea id="hidden_q1" style="display:none;"></textarea>
+            <textarea id="hidden_q2" style="display:none;"></textarea>
+            <textarea id="hidden_q6" style="display:none;"></textarea>
+            <textarea id="hidden_q7" style="display:none;"></textarea>
+            <textarea id="hidden_q9" style="display:none;"></textarea>
+            <textarea id="hidden_q10" style="display:none;"></textarea>
+            <textarea id="hidden_q11" style="display:none;"></textarea>
+            <textarea id="hidden_q12" style="display:none;"></textarea>
+            <textarea id="hidden_q13" style="display:none;"></textarea>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">০৩. হালনাগাদ সাংগঠনিক কাঠামোর (TO&E) কপি</label>
+                    <input type="text" id="q3" class="form-control" value="হালনাগাদ টি.ও.অ্যান্ড.ই (TO&E) এর কপি এবং পদের অর্গানোগ্রাম সংযুক্ত করা হলো (পরিশিষ্ট-ক)।">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-primary fw-bold">০৪. প্রস্তাবিত সেবা ক্রয়ের অনুকূলে যৌক্তিকতা</label>
+                <textarea id="q4" class="form-control bg-light text-dark" rows="5" placeholder="পদের তালিকা যুক্ত করলে যৌক্তিকতা স্বয়ংক্রিয়ভাবে তৈরি হবে..."></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">০৫. বর্তমানে কীভাবে গ্রহণ করা হচ্ছে</label>
+                <textarea id="q5" class="form-control" rows="3">বর্তমানে এই সুনির্দিষ্ট সেবার জন্য দপ্তরে নিজস্ব বা অনুমোদিত কোনো জনবল নেই। ফলে বর্তমানে সেবাটি যথাযথভাবে গ্রহণ করা সম্ভব হচ্ছে না, এতে দাপ্তরিক কার্যক্রম ব্যাহত হচ্ছে, যা নিরসনে আউটসোর্সিংয়ের মাধ্যমে সেবা গ্রহণ করা অপরিহার্য।</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">০৮. অস্থায়ী জনবলের বিবরণ</label>
+                <input type="text" id="q8" class="form-control" value="প্রযোজ্য নয়।">
+            </div>
+
+            <div class="mb-4 border border-danger rounded p-3 bg-white">
+                <label class="form-label text-danger fw-bold">০৯. বাজেটে বরাদ্দ (বাজেট কোড ও বরাদ্দ)</label>
+                <table class="table table-bordered text-center align-middle m-0" id="budgetTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="30%">কার্যালয়ের নাম</th>
+                            <th width="20%">অর্থনৈতিক কোড</th>
+                            <th width="20%">খাতের বিবরণ</th>
+                            <th width="20%">বরাদ্দ (হাজার টাকায়)</th>
+                            <th width="10%">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="budgetTableBody">
+                        <tr class="budget-row">
+                            <td><input type="text" class="form-control budget-office" value="সমাজসেবা অধিদপ্তর" oninput="updateCalculations()"></td>
+                            <td><input type="text" class="form-control text-center fw-bold budget-code border-0 bg-transparent" value="৩২১১১৩১" oninput="updateCalculations()"></td>
+                            <td class="fw-bold">আউটসোর্সিং</td>
+                            <td><input type="number" class="form-control text-center border-danger budget-amount" placeholder="উদা: ৫৬০০০" oninput="updateCalculations()"></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-end mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="addBudgetRow()">+ আরও কার্যালয়ের বরাদ্দ যুক্ত করুন</button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">১৪. অতিরিক্ত কোনো বক্তব্য</label>
+                <input type="text" id="q14" class="form-control" value="প্রযোজ্য নয়">
+            </div>
+
+            <div class="text-center mt-5 mb-3">
+                <button type="button" id="generateBtn" class="btn btn-success btn-lg px-5 shadow" onclick="executeGeneration()">চূড়ান্ত প্রস্তাব তৈরি করুন (সম্পূর্ণ ফাইল)</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Output Section for Printing -->
+    <div id="outputSection" style="display: none;">
+        <div class="text-center no-print mb-4">
+            <button class="btn btn-primary btn-lg mx-2 shadow" onclick="window.print()">🖨️ PDF সেভ বা প্রিন্ট করুন</button>
+            <button class="btn btn-secondary btn-lg mx-2 shadow" onclick="editProposal()">✏️ আবার এডিট করুন</button>
+            <div class="alert alert-info mt-3 fw-bold">
+                💡 নিচে থাকা ডকুমেন্টের যে কোনো লেখায় ক্লিক করে আপনি সরাসরি এডিট/পরিবর্তন করতে পারবেন।
+            </div>
+        </div>
+
+        <!-- 1. Note Sheet -->
+        <div id="docNoteSection" class="doc-body note-sheet" contenteditable="true"></div>
+        
+        <!-- Page Break before Letter -->
+        <div class="page-break"></div>
+
+        <!-- 2. Forwarding Letter -->
+        <div id="docLetterSection" class="doc-body" contenteditable="true"></div>
+        
+        <!-- Page Break before Schedule G -->
+        <div class="page-break"></div>
+        
+        <!-- 3. Schedule 'G' (Main Table) -->
+        <div class="print-header" contenteditable="true" style="margin-top:20px;">
+            তফসিল- 'গ'<br>
+            আউটসোর্সিং প্রক্রিয়ায় সেবা গ্রহণ নীতিমালা, ২০২৫ অনুযায়ী সেবা ক্রয়ের প্রস্তাব প্রেরণের ‘ছক’
+        </div>
+        <table class="table table-bordered border-dark">
+            <tbody id="tableBody"></tbody>
+        </table>
+        <div class="signature-area" contenteditable="true">
+            <p><strong>স্বাক্ষরিত/-</strong></p>
+            <p>তারিখ: .......................</p>
+            <p>(দাপ্তরিক সীল ও স্বাক্ষর)</p>
+        </div>
+
+        <!-- 4. Organogram (Appendix Ka) - Separate Page -->
+        <div id="organogramSection"></div>
+
+        <!-- 5. Justification (Appendix Kha) - Separate Page -->
+        <div id="docJustificationSection" class="doc-body" contenteditable="true"></div>
+
+        <div class="text-center no-print mt-5 pb-5">
+            <button class="btn btn-primary btn-lg mx-2 shadow" onclick="window.print()">🖨️ PDF সেভ বা প্রিন্ট করুন</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Utility & Data
+    const salaryData = {
+        "dhaka": { "ss1": 42978, "ss2": 28369, "ss3": 22598, "cat1": 20212, "cat2": 19636, "cat3": 19236, "cat4": 18660, "cat5": 18180 },
+        "city":  { "ss1": 40302, "ss2": 26636, "ss3": 21279, "cat1": 19080, "cat2": 18540, "cat3": 18165, "cat4": 17625, "cat5": 17175 },
+        "other": { "ss1": 38964, "ss2": 25769, "ss3": 20620, "cat1": 18514, "cat2": 17992, "cat3": 17630, "cat4": 17108, "cat5": 16673 }
+    };
+    const areaNames = { "dhaka": "ঢাকা মেট্রোপলিটন", "city": "সিটি কর্পোরেশন ও সাভার", "other": "অন্যান্য স্থান" };
+
+    const postJustifications = {
+        "নিরাপত্তা": "দপ্তরের সরকারি সম্পদ রক্ষা, অনাকাঙ্ক্ষিত প্রবেশ রোধ এবং কার্যালয় ও নিবাসীগণের সার্বিক নিরাপত্তা নিশ্চিতকরণকল্পে সার্বক্ষণিক পাহারার জন্য।",
+        "পরিচ্ছন্নতা": "অফিস ভবন, আঙিনা, ডরমেটরি এবং চারপাশের পরিবেশ স্বাস্থ্যকর ও জীবাণুমুক্ত রাখার জন্য।",
+        "ক্লিনার": "অফিস ভবন, আঙিনা, ডরমেটরি এবং চারপাশের পরিবেশ স্বাস্থ্যকর ও জীবাণুমুক্ত রাখার জন্য।",
+        "আয়া": "প্রতিষ্ঠানসমূহে অবস্থানরত শিশু, বৃদ্ধ, এতিম ও অসুস্থ নিবাসীদের সার্বক্ষণিক পরিচর্যা এবং ব্যক্তিগত পরিচ্ছন্নতার জন্য।",
+        "ওয়ার্ড বয়": "হাসপাতালে আগত রোগীদের প্রয়োজনীয় সেবা ও চিকিৎসা সহায়তার জন্য।",
+        "বাবুর্চি": "প্রতিষ্ঠানে অবস্থানরত নিবাসী এবং হাসপাতালে চিকিৎসাধীন রোগীদের জন্য নিয়মিত ও স্বাস্থ্যসম্মত খাবার প্রস্তুতের জন্য।",
+        "কুক": "প্রতিষ্ঠানে অবস্থানরত নিবাসী এবং হাসপাতালে চিকিৎসাধীন রোগীদের জন্য নিয়মিত ও স্বাস্থ্যসম্মত খাবার প্রস্তুতের জন্য।",
+        "ফরাশ": "অফিস কক্ষ ও আসবাবপত্র পরিষ্কার এবং দাপ্তরিক পরিবেশ পরিপাটি রাখার জন্য।",
+        "ড্রাইভার": "দপ্তরের যানবাহন সচল রাখা, প্রশাসনিক পরিদর্শন, রোগীদের জরুরি স্থানান্তর এবং দাপ্তরিক কাজের গতিশীলতা অব্যাহত রাখার জন্য।",
+        "ম্যাসেঞ্জার": "দপ্তরের দৈনন্দিন ফাইল ব্যবস্থাপনা, চিঠিপত্র আদান-প্রদান এবং প্রশাসনিক কার্যক্রমে সহায়তার জন্য।",
+        "অফিস সহায়ক": "দাপ্তরিক কার্যক্রমে সরাসরি সহায়তা প্রদান, ফাইল ব্যবস্থাপনা এবং দৈনন্দিন কাজের জন্য।",
+        "গার্ডেনার": "প্রতিষ্ঠানের সৌন্দর্যবর্ধন এবং বাগান পরিচর্যার জন্য।",
+        "ইলেকট্রিশিয়ান": "দপ্তরের বৈদ্যুতিক লাইনের নিরাপদ রক্ষণাবেক্ষণ এবং নিরবচ্ছিন্ন বিদ্যুৎ সরবরাহ নিশ্চিতকরণের জন্য।",
+        "পাম্প": "নিয়মিত পানি সরবরাহ নিশ্চিত করতে পাম্প চালানোর জন্য।",
+        "জেনারেটর": "বিদ্যুৎ বিভ্রাটের সময় নিরবচ্ছিন্ন বিদ্যুৎ সরবরাহের জন্য জেনারেটর পরিচালনার নিমিত্তে।"
+    };
+
+    function toBnNum(num) {
+        if (!num) return "";
+        return num.toString().replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+    }
+    
+    function formatDateBn(dateStr) {
+        if(!dateStr) return "অনির্ধারিত";
+        let parts = dateStr.split("-");
+        return toBnNum(`${parts[2]}-${parts[1]}-${parts[0]}`);
+    }
+
+    function formatFullDateBn(dateStr) {
+        if(!dateStr) return "";
+        const d = new Date(dateStr);
+        const months = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+        return toBnNum(d.getDate()) + " " + months[d.getMonth()] + " " + toBnNum(d.getFullYear()) + " খ্রি.";
+    }
+
+    window.onload = () => {
+        addInstitution();
+        let today = new Date().toISOString().split('T')[0];
+        document.getElementById('meta_en_date').value = today;
+    };
+
+    // HTML Generators
+    const getServiceRowHTML = () => `
+        <div class="service-item row g-2 align-items-end">
+            <button type="button" class="btn-close remove-btn text-danger" onclick="this.parentElement.remove(); updateCalculations();"></button>
+            <div class="col-md-3">
+                <label class="form-label">এলাকা</label>
+                <select class="form-select area-select" onchange="updateCalculations()">
+                    <option value="dhaka">ঢাকা মেট্রোপলিটন</option>
+                    <option value="city">অন্যান্য সিটি কর্পোরেশন ও সাভার</option>
+                    <option value="other" selected>অন্যান্য স্থান</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">পদের নাম</label>
+                <select class="form-select post-select" onchange="updateCalculations()">
+                    <optgroup label="ক্যাটাগরি-৫">
+                        <option value="cat5">নিরাপত্তা প্রহরী (সিকিউরিটি গার্ড)</option>
+                        <option value="cat5">পরিচ্ছন্নতাকর্মী (ক্লিনার)</option>
+                        <option value="cat5">আয়া</option>
+                        <option value="cat5">ওয়ার্ড বয়</option>
+                        <option value="cat5">চৌকিদার</option>
+                        <option value="cat5">ম্যাসেঞ্জার / অফিস সহায়ক</option>
+                        <option value="cat5">অদক্ষ শ্রমিক</option>
+                    </optgroup>
+                    <optgroup label="ক্যাটাগরি-৪">
+                        <option value="cat4">গার্ডেনার (বাগানকর্মী)</option>
+                        <option value="cat4">বাবুর্চি (কুক)</option>
+                        <option value="cat4">ফরাশ জমাদার</option>
+                        <option value="cat4">দক্ষ শ্রমিক</option>
+                    </optgroup>
+                    <optgroup label="ক্যাটাগরি-৩">
+                        <option value="cat3">টেইলর</option>
+                        <option value="cat3">সহকারী ইঞ্জিন মেকানিক</option>
+                    </optgroup>
+                    <optgroup label="ক্যাটাগরি-২">
+                        <option value="cat2">ড্রাইভার (লাইট)</option>
+                        <option value="cat2">পাম্প অপারেটর</option>
+                        <option value="cat2">স্যানিটারি মিস্ত্রি (প্লাম্বার)</option>
+                        <option value="cat2">জেনারেটর অপারেটর</option>
+                    </optgroup>
+                    <optgroup label="ক্যাটাগরি-১">
+                        <option value="cat1">ড্রাইভার (হেভি)</option>
+                        <option value="cat1">সুপারভাইজার</option>
+                        <option value="cat1">ইলেকট্রিশিয়ান</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">সংখ্যা</label>
+                <input type="number" class="form-control quantity-input" value="1" min="1" oninput="updateCalculations()">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">শুরুর তারিখ</label>
+                <input type="date" class="form-control start-date" onchange="updateCalculations()">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">শেষের তারিখ</label>
+                <input type="date" class="form-control end-date" onchange="updateCalculations()">
+            </div>
+        </div>`;
+
+    const getToeRowHTML = () => `
+        <div class="toe-item row g-2 align-items-end">
+            <button type="button" class="btn-close remove-btn text-danger" onclick="this.parentElement.remove(); updateCalculations();"></button>
+            <div class="col-md-5">
+                <label class="form-label">অনুমোদিত পদের নাম (TO&E অনুযায়ী)</label>
+                <input type="text" class="form-control toe-name" placeholder="যেমন: অফিস সহায়ক" oninput="updateCalculations()">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">পদের গ্রেড</label>
+                <select class="form-select toe-grade" onchange="updateCalculations()">
+                    <option value="২০">২০ তম গ্রেড</option>
+                    <option value="১৯">১৯ তম গ্রেড</option>
+                    <option value="১৮">১৮ তম গ্রেড</option>
+                    <option value="১৬">১৬ তম গ্রেড</option>
+                    <option value="১৫">১৫ তম গ্রেড</option>
+                    <option value="১৪">১৪ তম গ্রেড</option>
+                    <option value="১৩">১৩ তম গ্রেড</option>
+                    <option value="১১">১১ তম গ্রেড</option>
+                    <option value="১০">১০ম গ্রেড</option>
+                    <option value="৯">৯ম গ্রেড</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">অনুমোদিত পদসংখ্যা</label>
+                <input type="number" class="form-control toe-qty" value="1" min="1" oninput="updateCalculations()">
+            </div>
+        </div>`;
+
+    const getPrevOutRowHTML = () => `
+        <div class="prev-out-item row g-2 align-items-end">
+            <button type="button" class="btn-close remove-btn text-danger" onclick="this.parentElement.remove(); updateCalculations();"></button>
+            <div class="col-md-2">
+                <label class="form-label">সেবার নাম</label>
+                <input type="text" class="form-control prev-name" placeholder="উদা: গার্ড" oninput="updateCalculations()">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">ক্যাটাগরি</label>
+                <select class="form-select prev-cat" onchange="updateCalculations()">
+                    <option value="ক্যাটাগরি-৫">ক্যাটাগরি-৫</option>
+                    <option value="ক্যাটাগরি-৪">ক্যাটাগরি-৪</option>
+                    <option value="ক্যাটাগরি-৩">ক্যাটাগরি-৩</option>
+                    <option value="ক্যাটাগরি-২">ক্যাটাগরি-২</option>
+                    <option value="ক্যাটাগরি-১">ক্যাটাগরি-১</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">সংখ্যা</label>
+                <input type="number" class="form-control prev-qty" value="1" min="1" oninput="updateCalculations()">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">অনুমোদনের কপি/স্মারক নং</label>
+                <input type="text" class="form-control prev-memo" placeholder="স্মারক নং ও তারিখ" oninput="updateCalculations()">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">চুক্তির মেয়াদ</label>
+                <input type="text" class="form-control prev-duration" placeholder="উদা: ৩১-১২-২০২৪ পর্যন্ত" oninput="updateCalculations()">
+            </div>
+        </div>`;
+
+    function addInstitution() {
+        const container = document.getElementById("institutionsContainer");
+        const instCount = container.querySelectorAll('.inst-block').length + 1;
+        const instHTML = `
+        <div class="inst-block">
+            <div class="inst-header">
+                প্রতিষ্ঠান/অফিস <span class="inst-serial">${toBnNum(instCount)}</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-inst-btn" onclick="removeInstitution(this)">মুছে ফেলুন</button>
+            
+            <div class="mb-3">
+                <label class="form-label text-primary">যে প্রতিষ্ঠানের জন্য সেবা গ্রহণের প্রস্তাব করা হচ্ছে (নাম লিখুন):</label>
+                <input type="text" class="form-control border-primary inst-name fw-bold" placeholder="যেমন: সরকারি শিশু পরিবার, মিরপুর" oninput="updateCalculations()">
+            </div>
+
+            <div class="row bg-white p-2 rounded border mb-3">
+                <div class="col-md-4">
+                    <label class="form-label text-success">অফিসটি কি সরকারি ভবনে?</label>
+                    <select class="form-select inst-govt" onchange="updateCalculations()">
+                        <option value="yes">হ্যাঁ</option>
+                        <option value="no">না (ভাড়া বাড়ি)</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-success">এটি কি শিক্ষাপ্রতিষ্ঠান?</label>
+                    <select class="form-select inst-edu" onchange="toggleDetails(this, 'edu-box'); updateCalculations()">
+                        <option value="no">না</option>
+                        <option value="yes">হ্যাঁ</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-success">এটি কি হাসপাতাল/ক্লিনিক?</label>
+                    <select class="form-select inst-hosp" onchange="toggleDetails(this, 'hosp-box'); updateCalculations()">
+                        <option value="no">না</option>
+                        <option value="yes">হ্যাঁ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="edu-box bg-warning bg-opacity-10 p-3 rounded mb-3 border border-warning" style="display:none;">
+                <label class="form-label fw-bold text-dark border-bottom border-warning pb-1 mb-2">শিক্ষাপ্রতিষ্ঠানের বিবরণ:</label>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label small">শিক্ষার্থীর সংখ্যা</label>
+                        <input type="number" class="form-control inst-edu-students" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">শিক্ষক সংখ্যা</label>
+                        <input type="number" class="form-control inst-edu-teachers" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">অন্যান্য জনবলের সংখ্যা</label>
+                        <input type="number" class="form-control inst-edu-staff" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">অবস্থান</label>
+                        <input type="text" class="form-control inst-edu-location" placeholder="উদা: মিরপুর, ঢাকা" oninput="updateCalculations()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="hosp-box bg-info bg-opacity-10 p-3 rounded mb-3 border border-info" style="display:none;">
+                <label class="form-label fw-bold text-dark border-bottom border-info pb-1 mb-2">হাসপাতাল/ক্লিনিকের বিবরণ:</label>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label small">বেড সংখ্যা</label>
+                        <input type="number" class="form-control inst-hosp-beds" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">গড়ে আগত রোগীর সংখ্যা</label>
+                        <input type="number" class="form-control inst-hosp-patients" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">ডাক্তার সংখ্যা</label>
+                        <input type="number" class="form-control inst-hosp-doctors" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">অন্যান্য কর্মরত জনবল</label>
+                        <input type="number" class="form-control inst-hosp-staff" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">আকার ও আয়তন (বর্গফুট/একর)</label>
+                        <input type="text" class="form-control inst-hosp-size" placeholder="উদা: ৫ একর" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">আইসিইউ (ICU)</label>
+                        <input type="number" class="form-control inst-hosp-icu" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">সিসিইউ (CCU)</label>
+                        <input type="number" class="form-control inst-hosp-ccu" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">এইচডিইউ (HDU)</label>
+                        <input type="number" class="form-control inst-hosp-hdu" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">ওটি (OT)</label>
+                        <input type="number" class="form-control inst-hosp-ot" oninput="updateCalculations()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">লিফ্‌ট সংখ্যা</label>
+                        <input type="number" class="form-control inst-hosp-lifts" oninput="updateCalculations()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-warning bg-opacity-10 p-3 rounded mb-4 border border-warning">
+                <div class="d-flex justify-content-between align-items-center border-bottom border-warning pb-2">
+                    <h6 class="fw-bold text-dark m-0">বর্তমানে/পূর্বে আউটসোর্সিং সেবা গ্রহণ (০৬ নং পয়েন্টের জন্য):</h6>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input no-prev-out" type="checkbox" onchange="togglePrevOut(this); updateCalculations();" checked>
+                        <label class="form-check-label text-danger">পূর্বে আউটসোর্সিং সেবা গ্রহণ করা হয়নি</label>
+                    </div>
+                </div>
+                <div class="prev-out-container mt-3" style="display:none;">${getPrevOutRowHTML()}</div>
+                <button type="button" class="btn btn-warning btn-sm mt-2 prev-out-add-btn" style="display:none;" onclick="addPrevOutToInst(this)">+ আরও পদ যুক্ত করুন (পূর্বের)</button>
+            </div>
+
+            <div class="bg-secondary bg-opacity-10 p-3 rounded mb-4 border border-secondary">
+                <h6 class="fw-bold text-dark border-bottom border-dark pb-2">বিদ্যমান সাংগঠনিক কাঠামোর (TO&E) পদসমূহ (০৭ নং পয়েন্টের জন্য):</h6>
+                <div class="toe-container">${getToeRowHTML()}</div>
+                <button type="button" class="btn btn-dark btn-sm mt-2" onclick="addToeToInst(this)">+ আরও পদ যুক্ত করুন (TO&E)</button>
+            </div>
+
+            <div class="bg-success bg-opacity-10 p-3 rounded mb-4 border border-success">
+                <h6 class="fw-bold text-success border-bottom border-success pb-2">অফিস/স্থাপনার বর্ণনা (১৩ নং পয়েন্টের জন্য):</h6>
+                <div class="row g-2">
+                    <div class="col-md-3"><label class="form-label">ভবন সংখ্যা</label><input type="number" class="form-control bld-count" placeholder="উদা: ১" oninput="updateCalculations()"></div>
+                    <div class="col-md-3"><label class="form-label">কত তলা বিশিষ্ট</label><input type="number" class="form-control bld-floors" placeholder="উদা: ৪" oninput="updateCalculations()"></div>
+                    <div class="col-md-3"><label class="form-label">প্রতিতলার আয়তন (বর্গফুট)</label><input type="number" class="form-control bld-floor-area" placeholder="উদা: ২০০০" oninput="updateCalculations()"></div>
+                    <div class="col-md-3"><label class="form-label">মোট আয়তন (বর্গফুট)</label><input type="number" class="form-control bld-total-area" placeholder="উদা: ۸০০০" oninput="updateCalculations()"></div>
+                    <div class="col-md-3"><label class="form-label">গেটের সংখ্যা</label><input type="number" class="form-control bld-gates" placeholder="উদা: ২" oninput="updateCalculations()"></div>
+                    <div class="col-md-3"><label class="form-label">লিফ্‌ট সংখ্যা</label><input type="number" class="form-control bld-lifts" placeholder="উদা: ১" oninput="updateCalculations()"></div>
+                    <div class="col-md-3"><label class="form-label">ওয়াশরুমের সংখ্যা</label><input type="number" class="form-control bld-washrooms" placeholder="উদা: ৪" oninput="updateCalculations()"></div>
+                    <div class="col-md-3"><label class="form-label">অন্যান্য (যদি থাকে)</label><input type="text" class="form-control bld-others" placeholder="উদা: ১টি গ্যারেজ" oninput="updateCalculations()"></div>
+                </div>
+            </div>
+
+            <div class="bg-primary bg-opacity-10 p-3 rounded border border-primary">
+                <h6 class="fw-bold text-primary border-bottom border-primary pb-2">এই প্রতিষ্ঠানের জন্য আউটসোর্সিং প্রস্তাবিত পদের তালিকা (০২ নং পয়েন্টের জন্য):</h6>
+                <div class="services-container">${getServiceRowHTML()}</div>
+                <button type="button" class="btn btn-primary btn-sm mt-2" onclick="addServiceToInst(this)">+ আরও পদ যুক্ত করুন (আউটসোর্সিং)</button>
+            </div>
+        </div>`;
+        container.insertAdjacentHTML('beforeend', instHTML);
+        updateCalculations();
+    }
+
+    function removeInstitution(btn) {
+        const container = document.getElementById("institutionsContainer");
+        if(container.querySelectorAll('.inst-block').length > 1) {
+            btn.closest('.inst-block').remove();
+            updateCalculations();
+        } else {
+            alert("কমপক্ষে একটি প্রতিষ্ঠান থাকতে হবে!");
+        }
+    }
+
+    function addBudgetRow() {
+        const tbody = document.getElementById("budgetTableBody");
+        const tr = document.createElement("tr");
+        tr.className = "budget-row";
+        tr.innerHTML = `
+            <td><input type="text" class="form-control budget-office" placeholder="যেমন: সরকারি শিশু পরিবার, মিরপুর" oninput="updateCalculations()"></td>
+            <td><input type="text" class="form-control text-center fw-bold budget-code border-0 bg-transparent" value="৩২১১১৩১" oninput="updateCalculations()"></td>
+            <td class="fw-bold">আউটসোর্সিং</td>
+            <td><input type="number" class="form-control text-center border-danger budget-amount" placeholder="উদা: ৫৬০০০" oninput="updateCalculations()"></td>
+            <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove(); updateCalculations();">X</button></td>
+        `;
+        tbody.appendChild(tr);
+        updateCalculations();
+    }
+
+    function toggleDetails(selectElem, boxClass) {
+        const block = selectElem.closest('.inst-block');
+        const detailsBox = block.querySelector('.' + boxClass);
+        if(selectElem.value === 'yes') detailsBox.style.display = 'block';
+        else detailsBox.style.display = 'none';
+    }
+
+    function togglePrevOut(checkbox) {
+        const block = checkbox.closest('.bg-warning');
+        const container = block.querySelector('.prev-out-container');
+        const addBtn = block.querySelector('.prev-out-add-btn');
+        if (checkbox.checked) { container.style.display = 'none'; addBtn.style.display = 'none'; } 
+        else { container.style.display = 'block'; addBtn.style.display = 'block'; }
+    }
+
+    function addServiceToInst(btn) { btn.previousElementSibling.insertAdjacentHTML('beforeend', getServiceRowHTML()); updateCalculations(); }
+    function addToeToInst(btn) { btn.previousElementSibling.insertAdjacentHTML('beforeend', getToeRowHTML()); updateCalculations(); }
+    function addPrevOutToInst(btn) { btn.previousElementSibling.insertAdjacentHTML('beforeend', getPrevOutRowHTML()); updateCalculations(); }
+
+    function updateCalculations() {
+        const instBlocks = document.querySelectorAll(".inst-block");
+        let grandTotal = 0; let totalWorkersGlobal = 0; let hasDriverGlobal = false;
+        let q1_list = []; let q2_list = []; let q6_list = []; let q7_list = []; let q9_breakdown = ""; let q10_list = []; let q11_list = []; let q12_list = []; let q13_list = []; let liveSummary = "";
+        let allProposedPostsForJustification = new Set(); let isMultiple = instBlocks.length > 1;
+
+        instBlocks.forEach((block, index) => {
+            let serialNum = index + 1; let bnSerial = toBnNum(serialNum);
+            let rawName = block.querySelector(".inst-name").value.trim(); let instName = rawName || `প্রতিষ্ঠান-${bnSerial}`;
+            let prefixBold = isMultiple ? `<b>${bnSerial}. ${instName}:</b><br>` : ``;
+
+            if(rawName) q1_list.push(isMultiple ? `${bnSerial}. ${instName}` : instName);
+
+            let isGovt = block.querySelector(".inst-govt").value;
+            let isEdu = block.querySelector(".inst-edu").value;
+            let isHosp = block.querySelector(".inst-hosp").value;
+
+            q10_list.push(`${prefixBold}${(isGovt === "yes") ? "দপ্তরটি সরকারি ভবনে অবস্থিত।" : "দপ্তরটি ভাড়া বাড়িতে অবস্থিত।"} আনসার সদস্যের কোনো কোটা/পদ নেই।`);
+            
+            if(isEdu === "yes") {
+                let stu = block.querySelector(".inst-edu-students").value ? toBnNum(block.querySelector(".inst-edu-students").value) : "০";
+                let tch = block.querySelector(".inst-edu-teachers").value ? toBnNum(block.querySelector(".inst-edu-teachers").value) : "০";
+                let stf = block.querySelector(".inst-edu-staff").value ? toBnNum(block.querySelector(".inst-edu-staff").value) : "০";
+                let loc = block.querySelector(".inst-edu-location").value || "-";
+                q11_list.push(`${prefixBold}<b>শিক্ষার্থীর সংখ্যা:</b> ${stu} জন, <b>শিক্ষক সংখ্যা:</b> ${tch} জন, <b>অন্যান্য জনবল:</b> ${stf} জন, <b>অবস্থান:</b> ${loc}।`);
+            }
+
+            if(isHosp === "yes") {
+                let beds = block.querySelector(".inst-hosp-beds").value ? toBnNum(block.querySelector(".inst-hosp-beds").value) : "০";
+                let pats = block.querySelector(".inst-hosp-patients").value ? toBnNum(block.querySelector(".inst-hosp-patients").value) : "০";
+                let docs = block.querySelector(".inst-hosp-doctors").value ? toBnNum(block.querySelector(".inst-hosp-doctors").value) : "০";
+                let hStf = block.querySelector(".inst-hosp-staff").value ? toBnNum(block.querySelector(".inst-hosp-staff").value) : "০";
+                let size = block.querySelector(".inst-hosp-size").value || "-";
+                let icu = block.querySelector(".inst-hosp-icu").value ? toBnNum(block.querySelector(".inst-hosp-icu").value) : "০";
+                let ccu = block.querySelector(".inst-hosp-ccu").value ? toBnNum(block.querySelector(".inst-hosp-ccu").value) : "০";
+                let hdu = block.querySelector(".inst-hosp-hdu").value ? toBnNum(block.querySelector(".inst-hosp-hdu").value) : "০";
+                let ot = block.querySelector(".inst-hosp-ot").value ? toBnNum(block.querySelector(".inst-hosp-ot").value) : "০";
+                let lifts = block.querySelector(".inst-hosp-lifts").value ? toBnNum(block.querySelector(".inst-hosp-lifts").value) : "০";
+                
+                q12_list.push(`${prefixBold}
+                    <div class="bld-info-grid">
+                        <div><b>বেড সংখ্যা:</b> ${beds}</div>
+                        <div><b>গড়ে আগত রোগী:</b> ${pats}</div>
+                        <div><b>ডাক্তার সংখ্যা:</b> ${docs}</div>
+                        <div><b>অন্যান্য জনবল:</b> ${hStf}</div>
+                        <div><b>আকার ও আয়তন:</b> ${size}</div>
+                        <div><b>আইসিইউ:</b> ${icu} টি</div>
+                        <div><b>সিসিইউ:</b> ${ccu} টি</div>
+                        <div><b>এইচডিইউ:</b> ${hdu} টি</div>
+                        <div><b>ওটি:</b> ${ot} টি</div>
+                        <div><b>লিফ্‌ট সংখ্যা:</b> ${lifts} টি</div>
+                    </div><br>`);
+            }
+
+            let noPrevOut = block.querySelector(".no-prev-out").checked;
+            if (noPrevOut) {
+                q6_list.push(`${prefixBold}পূর্বে উক্ত কার্যালয়ে আউটসোর্সিং পদ্ধতিতে সেবা গ্রহণ করা হয়নি।<br><br>`);
+            } else {
+                const prevItems = block.querySelectorAll(".prev-out-item");
+                let prevTableHTML = `<table class="prev-out-print-table">
+                                        <tr><th>সেবার নাম</th><th>ক্যাটাগরি</th><th>সংখ্যা</th><th>স্মারক</th><th>মেয়াদ</th></tr>`;
+                let hasPrevData = false;
+                prevItems.forEach(item => {
+                    let name = item.querySelector(".prev-name").value.trim();
+                    let cat = item.querySelector(".prev-cat").value;
+                    let qty = parseInt(item.querySelector(".prev-qty").value) || 0;
+                    let memo = item.querySelector(".prev-memo").value.trim();
+                    let duration = item.querySelector(".prev-duration").value.trim();
+                    if(name && qty > 0) {
+                        hasPrevData = true;
+                        prevTableHTML += `<tr><td style="text-align:left;">${name}</td><td>${cat}</td><td>${toBnNum(qty)}</td><td>${memo||"-"}</td><td>${duration||"-"}</td></tr>`;
+                    }
+                });
+                prevTableHTML += `</table>`;
+                if(hasPrevData) q6_list.push(`${prefixBold}বর্তমানে নিম্নোক্ত আউটসোর্সিং সেবা গ্রহণ করা হচ্ছে:<br>${prevTableHTML}<br>`);
+                else q6_list.push(`${prefixBold}পূর্বে উক্ত কার্যালয়ে আউটসোর্সিং পদ্ধতিতে সেবা গ্রহণ করা হয়নি।<br><br>`);
+            }
+
+            let bldCount = block.querySelector(".bld-count").value ? toBnNum(block.querySelector(".bld-count").value) + "টি" : "-";
+            let bldFloors = block.querySelector(".bld-floors").value ? toBnNum(block.querySelector(".bld-floors").value) + " তলা" : "-";
+            let bldFloorArea = block.querySelector(".bld-floor-area").value ? toBnNum(block.querySelector(".bld-floor-area").value) + " বর্গফুট" : "-";
+            let bldTotalArea = block.querySelector(".bld-total-area").value ? toBnNum(block.querySelector(".bld-total-area").value) + " বর্গফুট" : "-";
+            let bldGates = block.querySelector(".bld-gates").value ? toBnNum(block.querySelector(".bld-gates").value) + "টি" : "-";
+            let bldLifts = block.querySelector(".bld-lifts").value ? toBnNum(block.querySelector(".bld-lifts").value) + "টি" : "-";
+            let bldWashrooms = block.querySelector(".bld-washrooms").value ? toBnNum(block.querySelector(".bld-washrooms").value) + "টি" : "-";
+            let bldOthers = block.querySelector(".bld-others").value || "";
+
+            let q13_html = `${prefixBold}
+                <div class="bld-info-grid">
+                    <div><b>ভবন সংখ্যা:</b> ${bldCount}</div>
+                    <div><b>কত তলা বিশিষ্ট:</b> ${bldFloors}</div>
+                    <div><b>প্রতিতলার আয়তন:</b> ${bldFloorArea}</div>
+                    <div><b>মোট আয়তন:</b> ${bldTotalArea}</div>
+                    <div><b>গেটের সংখ্যা:</b> ${bldGates}</div>
+                    <div><b>লিফ্‌ট সংখ্যা:</b> ${bldLifts}</div>
+                    <div><b>ওয়াশরুমের সংখ্যা:</b> ${bldWashrooms}</div>
+                </div>`;
+            if (bldOthers) q13_html += `<div><b>অন্যান্য:</b> ${bldOthers}</div>`;
+            q13_list.push(q13_html + `<br>`);
+
+            const serviceItems = block.querySelectorAll(".service-item");
+            let instTotal = 0; let instWorkers = 0; let q2_inst_text = ""; let q9_inst_text = ""; let proposedNames = []; 
+
+            serviceItems.forEach(item => {
+                let areaVal = item.querySelector(".area-select").value;
+                let postSelect = item.querySelector(".post-select");
+                let catVal = postSelect.value;
+                let postName = postSelect.options[postSelect.selectedIndex].text;
+                let qty = parseInt(item.querySelector(".quantity-input").value) || 0;
+                let sDate = formatDateBn(item.querySelector(".start-date").value);
+                let eDate = formatDateBn(item.querySelector(".end-date").value);
+                
+                if (postName.includes("ড্রাইভার")) hasDriverGlobal = true;
+
+                if (qty > 0) {
+                    proposedNames.push(postName); 
+                    allProposedPostsForJustification.add(postName.split(" (")[0]); 
+                    
+                    instWorkers += qty;
+                    let monthlySalary = salaryData[areaVal][catVal];
+                    let yearlySalary = monthlySalary * 12;
+                    let festivalBonus = monthlySalary * 1; 
+                    let boishakhiBonus = Math.round(monthlySalary * 0.2); 
+                    let rowTotal = Math.round((yearlySalary + festivalBonus + boishakhiBonus) * qty);
+                    instTotal += rowTotal;
+                    
+                    let bnQty = toBnNum(qty);
+                    let dateStr = (sDate !== "অনির্ধারিত" && eDate !== "অনির্ধারিত") ? ` (সময়কাল: ${sDate} হতে ${eDate})` : ``;
+                    q2_inst_text += `- ${postName} - ${bnQty} জন (${areaNames[areaVal]})${dateStr}<br>`;
+                    
+                    q9_inst_text += `
+                        &nbsp;&nbsp;<b>${postName} (${bnQty} জন):</b><br>
+                        &nbsp;&nbsp;- ১২ মাসের সেবামূল্য: ${toBnNum(new Intl.NumberFormat('en-IN').format(yearlySalary * qty))}/-<br>
+                        &nbsp;&nbsp;- ২টি উৎসব ভাতা: ${toBnNum(new Intl.NumberFormat('en-IN').format(festivalBonus * qty))}/-<br>
+                        &nbsp;&nbsp;- ১টি বৈশাখী ভাতা: ${toBnNum(new Intl.NumberFormat('en-IN').format(boishakhiBonus * qty))}/-<br>
+                        &nbsp;&nbsp;<i>মোট: ${toBnNum(new Intl.NumberFormat('en-IN').format(rowTotal))}/-</i><br>
+                    `;
+                }
+            });
+
+            if(instWorkers > 0) {
+                q2_list.push(`${prefixBold}${q2_inst_text}`);
+                q9_breakdown += `${prefixBold}${q9_inst_text}<br>`;
+                liveSummary += `<span class="text-primary fw-bold">${instName}:</span> আউটসোর্সিং পদ: ${toBnNum(instWorkers)} জন | বাৎসরিক খরচ: ${toBnNum(new Intl.NumberFormat('en-IN').format(instTotal))}/-<br>`;
+            }
+
+            totalWorkersGlobal += instWorkers; grandTotal += instTotal;
+
+            const toeItems = block.querySelectorAll(".toe-item");
+            let matchingToeNames = [];
+            toeItems.forEach(item => {
+                let name = item.querySelector(".toe-name").value.trim();
+                let qty = parseInt(item.querySelector(".toe-qty").value) || 0;
+                if(name && qty > 0) {
+                    let matchFound = false;
+                    proposedNames.forEach(pName => {
+                        let pStr = pName.replace(/[য়য়]/g, 'য');
+                        let nStr = name.replace(/[য়য়]/g, 'য');
+                        if(pStr.includes(nStr) || nStr.includes(pStr.split(' (')[0])) matchFound = true;
+                    });
+                    if(matchFound && !matchingToeNames.includes(name)) matchingToeNames.push(name);
+                }
+            });
+
+            if (matchingToeNames.length > 0) {
+                q7_list.push(`${prefixBold}বিদ্যমান সেবা সম্পাদনের জন্য উক্ত প্রতিষ্ঠানের জনবল কাঠামোতে <b>"${matchingToeNames.join(", ")}"</b> পদনামের জনবল আছে।<br><br>`);
+            } else {
+                q7_list.push(`${prefixBold}প্রস্তাবিত সেবা সম্পাদনের জন্য উক্ত প্রতিষ্ঠানের সাংগঠনিক কাঠামোতে উপযুক্ত জনবল নেই।<br><br>`);
+            }
+        });
+
+        // Dynamic Justification Generation (Q4)
+        if(allProposedPostsForJustification.size > 0) {
+            let justificationText = "দাপ্তরিক কার্যক্রম সুষ্ঠুভাবে পরিচালনার জন্য আউটসোর্সিং প্রক্রিয়ায় নিম্নোক্ত যৌক্তিকতার ভিত্তিতে সেবা গ্রহণ করা একান্ত আবশ্যক:\n\n";
+            let jIndex = 1;
+            allProposedPostsForJustification.forEach(post => {
+                let reason = "দাপ্তরিক কাজ সম্পাদনের জন্য।";
+                for(let key in postJustifications) {
+                    if(post.includes(key)) { reason = postJustifications[key]; break; }
+                }
+                justificationText += `${toBnNum(jIndex)}. ${post}:\n${reason}\n\n`;
+                jIndex++;
+            });
+            document.getElementById("q4").value = justificationText.trim();
+        }
+
+        let mainOrg = document.getElementById("q1_main").value;
+        document.getElementById("hidden_q1").value = q1_list.length > 0 ? `${mainOrg}<br><br><b>যে প্রতিষ্ঠানে আউটসোর্সিং পদ্ধতিতে সেবা গ্রহণের প্রস্তাব করা হচ্ছে:</b><br>${q1_list.join("<br>")}` : mainOrg;
+        document.getElementById("hidden_q2").value = q2_list.length > 0 ? q2_list.join("<br>") : "";
+        document.getElementById("hidden_q6").value = q6_list.join("");
+        document.getElementById("hidden_q7").value = q7_list.join("");
+        document.getElementById("hidden_q10").value = q10_list.join("<br><br>");
+        document.getElementById("hidden_q11").value = q11_list.length > 0 ? q11_list.join("<br><br>") : "প্রযোজ্য নয়";
+        document.getElementById("hidden_q12").value = q12_list.length > 0 ? q12_list.join("") : "প্রযোজ্য নয়";
+        document.getElementById("hidden_q13").value = q13_list.join("");
+
+        let formattedTotal = new Intl.NumberFormat('en-IN').format(grandTotal);
+        let bnFormattedTotal = toBnNum(formattedTotal);
+        
+        // Budget Breakdown
+        let budgetRows = document.querySelectorAll(".budget-row");
+        let budgetDetailsHTML = ""; let totalBudgetTk = 0; let finalQ9 = "";
+
+        if (budgetRows.length === 1) {
+            let row = budgetRows[0];
+            let code = row.querySelector(".budget-code").value.trim() || "৩২১১১৩১";
+            let amountK = parseInt(row.querySelector(".budget-amount").value) || 0;
+            let amountTk = amountK * 1000;
+            let office = row.querySelector(".budget-office").value.trim();
+            finalQ9 += office ? `<b>কার্যালয়ের নাম:</b> ${office}<br>` : "";
+            finalQ9 += `<b>বাজেট কোড:</b> ${code}<br>`;
+            if (amountK > 0) finalQ9 += `উক্ত কোডে চলতি অর্থবছরের পরিচালন বাজেটে মোট বরাদ্দ রয়েছে <b>${toBnNum(new Intl.NumberFormat('en-IN').format(amountTk))}/- টাকা</b>, যা থেকে প্রস্তাবিত ব্যয় নির্বাহ করা সম্ভব।<br><br>`;
+            else finalQ9 += `উক্ত কোডে চলতি অর্থবছরে বাজেটে পর্যাপ্ত বরাদ্দ আছে।<br><br>`;
+        } else {
+            budgetDetailsHTML = `<table class="prev-out-print-table"><tr><th>কার্যালয়ের নাম</th><th>বাজেট কোড</th><th>বরাদ্দকৃত অর্থ</th></tr>`;
+            budgetRows.forEach(row => {
+                let office = row.querySelector(".budget-office").value.trim() || "-";
+                let code = row.querySelector(".budget-code").value.trim() || "৩২১১১৩১";
+                let amountK = parseInt(row.querySelector(".budget-amount").value) || 0;
+                let amountTk = amountK * 1000; totalBudgetTk += amountTk;
+                let amountText = amountK > 0 ? `${toBnNum(new Intl.NumberFormat('en-IN').format(amountTk))}/- টাকা` : "পর্যাপ্ত বরাদ্দ আছে";
+                budgetDetailsHTML += `<tr><td style="text-align:left;">${office}</td><td>${code}</td><td style="text-align:right; padding-right:10px;">${amountText}</td></tr>`;
+            });
+            budgetDetailsHTML += `</table>`;
+            finalQ9 += `<b>চলতি অর্থবছরের পরিচালন বাজেটে কার্যালয়ভিত্তিক বরাদ্দ:</b><br>${budgetDetailsHTML}`;
+            if (totalBudgetTk > 0) finalQ9 += `উল্লিখিত কোডসমূহে সর্বমোট <b>${toBnNum(new Intl.NumberFormat('en-IN').format(totalBudgetTk))}/- টাকা</b> বরাদ্দ রয়েছে, যা থেকে প্রস্তাবিত ব্যয় নির্বাহ করা সম্ভব।<br><br>`;
+            else finalQ9 += `<br>`;
+        }
+
+        finalQ9 += `<b>নীতিমালা অনুযায়ী আর্থিক সংশ্লেষের বিস্তারিত বিভাজন:</b><br>${q9_breakdown}<strong style="font-size:16px;">সর্বমোট ${toBnNum(totalWorkersGlobal)} জনের বার্ষিক আর্থিক সংশ্লেষ: ${bnFormattedTotal}/- টাকা।</strong><br>`;
+
+        let notesHTML = `<br><span style="font-size:13px; color:#555;">* <b>ইউনিফর্ম:</b> নীতিমালার ৫(গ)(৮) ধারা অনুযায়ী প্রত্যেক সেবাকর্মী বছরে ২ সেট ইউনিফর্ম প্রাপ্য হবেন, যার ব্যয় প্রতিষ্ঠানের নিজ খাত থেকে নির্বাহ করা হবে।<br>`;
+        if (hasDriverGlobal) notesHTML += `* <b>ওভারটাইম:</b> নীতিমালার বিবিধ(৩) ধারা অনুযায়ী গাড়িচালকদের ক্ষেত্রে প্রতি ঘণ্টা ৮০ টাকা (মাসিক সর্বোচ্চ ১০০ ঘণ্টা) হিসেবে ওভারটাইম প্রাপ্য হবেন, যা প্রয়োজন অনুযায়ী প্রদান করতে হবে।<br>`;
+        notesHTML += `</span>`;
+        
+        document.getElementById("hidden_q9").value = finalQ9 + notesHTML;
+        document.getElementById("liveSummaryText").innerHTML = liveSummary + `<hr class="my-1"><strong class="text-danger">সর্বমোট পদ: ${toBnNum(totalWorkersGlobal)} টি | সর্বমোট বার্ষিক বাজেট: ${bnFormattedTotal}/- টাকা</strong>`;
+    }
+
+    function executeGeneration() {
+        updateCalculations();
+        
+        const btn = document.getElementById("generateBtn");
+        btn.innerHTML = "⏳ জেনারেট হচ্ছে... অপেক্ষা করুন";
+        btn.disabled = true;
+
+        generateFallbackDocs();
+        populateScheduleG();
+
+        btn.innerHTML = "চূড়ান্ত প্রস্তাব তৈরি করুন (সম্পূর্ণ ফাইল)";
+        btn.disabled = false;
+        
+        document.querySelector(".no-print").style.display = "none";
+        document.getElementById("outputSection").style.display = "block";
+    }
+
+    function generateFallbackDocs() {
+        let noteSection = document.getElementById("docNoteSection");
+        noteSection.innerHTML = `
+            <div class="doc-title">নোট শিট</div>
+            <div class="doc-para"><strong>বিষয়: সমাজসেবা অধিদপ্তরাধীন বিভিন্ন কার্যালয়/প্রতিষ্ঠানের জন্য আউটসোর্সিং পদ্ধতিতে সেবা গ্রহণের প্রস্তাব অনুমোদন প্রসঙ্গে।</strong></div>
+            <div class="doc-para">সমাজসেবা অধিদপ্তরাধীন বিভিন্ন কার্যালয়/প্রতিষ্ঠান পরিচালিত হয়ে আসছে, যেখানে নিরবচ্ছিন্ন সেবা প্রদান করা হয়। উল্লিখিত প্রতিষ্ঠানসমূহে বর্তমানে পরিষ্কার-পরিচ্ছন্নতা, নিরাপত্তা ও অন্যান্য সহায়ক কাজের জন্য নিজস্ব বা অনুমোদিত পর্যাপ্ত জনবল নেই। উপযুক্ত সেবাদানকারীর অভাবে প্রতিষ্ঠানসমূহের দৈনন্দিন দাপ্তরিক কার্যক্রম এবং সার্বিক সেবাদান ব্যাহত হচ্ছে।</div>
+            <div class="doc-para">অর্থ বিভাগের “আউটসোর্সিং প্রক্রিয়ায় সেবা গ্রহণ নীতিমালা, ২০২৫” এবং সচিবালয় নির্দেশমালা ২০২৪ এর অনুচ্ছেদ অনুযায়ী সেবা ক্রয়ের নিমিত্তে তফসিল 'গ' এবং পরিশিষ্ট 'খ' প্রস্তুত করা হয়েছে। প্রস্তাবিত ব্যয়ের জন্য চলতি অর্থবছরের পরিচালন বাজেটের ৩২১১১৩১ (আউটসোর্সিং) কোডে পর্যাপ্ত বরাদ্দ রয়েছে।</div>
+            <div class="doc-para">বর্ণিতাবস্থার পরিপ্রেক্ষিতে, সমাজসেবা অধিদপ্তরের প্রস্তাবিত কার্যালয়সমূহের দাপ্তরিক ও সেবামূলক কার্যক্রম সুষ্ঠুভাবে পরিচালনার স্বার্থে সংযুক্ত ছকে (তফসিল-গ এবং পরিশিষ্ট-খ) আউটসোর্সিং প্রক্রিয়ায় সেবা ক্রয়ের প্রস্তাবটি সদয় অনুমোদনের জন্য প্রশাসনিক মন্ত্রণালয় (সমাজকল্যাণ মন্ত্রণালয়)-এ প্রেরণের নিমিত্তে প্রস্তুতকৃত পত্রটিতে সদয় স্বাক্ষরের জন্য নথি উপস্থাপন করা হলো।</div>
+        `;
+
+        let memo = document.getElementById("meta_memo").value;
+        let bnDate = document.getElementById("meta_bn_date").value;
+        let enDateRaw = document.getElementById("meta_en_date").value;
+        let enDate = formatFullDateBn(enDateRaw);
+        let sender = document.getElementById("meta_sender").value.replace(/\n/g, "<br>");
+        let receiver = document.getElementById("meta_receiver").value.replace(/\n/g, "<br>");
+
+        let letterSection = document.getElementById("docLetterSection");
+        letterSection.innerHTML = `
+            <div style="text-align: center; margin-bottom: 20px;">
+                গণপ্রজাতন্ত্রী বাংলাদেশ সরকার<br>
+                সমাজসেবা অধিদপ্তর<br>
+                ই-৮/বি-১, আগারগাঁও, শেরেবাংলা নগর, ঢাকা-১২০৭<br>
+                ওয়েবসাইট: www.dss.gov.bd
+            </div>
+            <table class="no-border-table" style="width: 100%; margin-bottom: 20px;">
+                <tr>
+                    <td style="width: 60%;">স্মারক নম্বর: ${memo}</td>
+                    <td style="width: 40%; text-align: right;">তারিখ: ${bnDate}<br>${enDate}</td>
+                </tr>
+            </table>
+            <div class="doc-para"><strong>বিষয়: সমাজসেবা অধিদপ্তরাধীন বিভিন্ন কার্যালয়/প্রতিষ্ঠানের জন্য আউটসোর্সিং পদ্ধতিতে সেবা গ্রহণের প্রস্তাব অনুমোদন প্রসঙ্গে।</strong></div>
+            <div class="doc-para">সূত্র: অর্থ বিভাগের পরিপত্র নম্বর: ০৭.০০.০০০০.০০.০০.০০.২০২৫, তারিখ: [পরিপত্রের তারিখ]</div>
+            
+            <div class="doc-para" style="text-indent: 40px;">উপযুক্ত বিষয় ও সূত্রের পরিপ্রেক্ষিতে সদয় অবগতির জন্য জানানো যাচ্ছে যে, সমাজসেবা অধিদপ্তরাধীন বিভিন্ন কার্যালয় ও সেবামূলক প্রতিষ্ঠানে বর্তমানে নিজস্ব কোনো জনবল না থাকায় দাপ্তরিক ও সেবামূলক কার্যক্রম ব্যাহত হচ্ছে। সরকারি সম্পদের সার্বিক নিরাপত্তা, স্বাস্থ্যকর পরিবেশ নিশ্চিতকরণ এবং নিবাসী/রোগীদের নিরবচ্ছিন্ন সেবা প্রদানের লক্ষ্যে অর্থ বিভাগের “আউটসোর্সিং প্রক্রিয়ায় সেবা গ্রহণ নীতিমালা, ২০২৫” এর বিধান অনুযায়ী সেবা গ্রহণ করা একান্ত আবশ্যক।</div>
+            <div class="doc-para" style="text-indent: 40px;">প্রস্তাবিত সেবাসমূহের বিপরীতে চলতি অর্থবছরের পরিচালন বাজেটের ৩২১১১৩১ (আউটসোর্সিং) কোডে পর্যাপ্ত বরাদ্দ রয়েছে।</div>
+            <div class="doc-para" style="text-indent: 40px;">এমতাবস্থায়, সমাজসেবা অধিদপ্তরের জন্য প্রস্তুতকৃত আউটসোর্সিং প্রক্রিয়ায় সেবা ক্রয়ের প্রস্তাবটি (তফসিল-'গ', পরিশিষ্ট-'ক' ও 'খ' সহ) সদয় অনুমোদনের জন্য প্রেরণ করা হলো।</div>
+            
+            <table class="no-border-table" style="width: 100%; margin-top: 50px;">
+                <tr>
+                    <td style="width: 50%; vertical-align: top;">
+                        ${receiver}
+                    </td>
+                    <td style="width: 50%; vertical-align: top; text-align: right;">
+                        <br><br><br>
+                        ${sender}
+                    </td>
+                </tr>
+            </table>
+        `;
+
+        let rawJust = document.getElementById("q4").value;
+        let formattedJust = rawJust.replace(/\n\n/g, '</div><div class="doc-para">').replace(/\n/g, '<br>');
+        let justSection = document.getElementById("docJustificationSection");
+        justSection.innerHTML = `
+            <div class="page-break"></div>
+            <div class="doc-title">পরিশিষ্ট-খ</div>
+            <div class="doc-title" style="text-decoration:none; font-size:16px;">আউটসোর্সিং প্রক্রিয়ায় সেবা গ্রহণের জন্য প্রস্তাবিত পদসমূহের যৌক্তিকতা</div>
+            <div class="doc-para">${formattedJust}</div>
+            <div class="doc-para"><strong>সার্বিক যৌক্তিকতা:</strong> উল্লিখিত পদসমূহের বিপরীতে বিদ্যমান সাংগঠনিক কাঠামোতে নিজস্ব জনবল না থাকায় এবং দৈনন্দিন সেবা প্রদান ব্যাহত হওয়ার কারণে উক্ত পদসমূহে আউটসোর্সিংয়ের মাধ্যমে জনবল নিয়োগ করা ছাড়া প্রতিষ্ঠানের মূল লক্ষ্য অর্জন সম্ভব নয়।</div>
+        `;
+
+        generateOrganogram();
+    }
+
+    function generateOrganogram() {
+        let organogramHTML = `<div class="page-break"></div>
+                              <div class="print-header" style="margin-top: 20px;" contenteditable="true">
+                                  পরিশিষ্ট-ক: সাংগঠনিক কাঠামো (অর্গানোগ্রাম)
+                              </div>`;
+        const instBlocks = document.querySelectorAll(".inst-block");
+        let hasData = false;
+
+        instBlocks.forEach((block, index) => {
+            let rawName = block.querySelector(".inst-name").value.trim();
+            let instName = rawName || `প্রতিষ্ঠান-${toBnNum(index + 1)}`;
+            
+            let toeNodesHTML = '';
+            block.querySelectorAll(".toe-item").forEach(item => {
+                let name = item.querySelector(".toe-name").value.trim();
+                let grade = item.querySelector(".toe-grade").value;
+                let qty = parseInt(item.querySelector(".toe-qty").value) || 0;
+                if (name && qty > 0) toeNodesHTML += `<div class="tree-node" contenteditable="true">${name}<br><small>(গ্রেড: ${toBnNum(grade)} | পদসংখ্যা: ${toBnNum(qty)})</small></div>`;
+            });
+
+            let outNodesHTML = '';
+            block.querySelectorAll(".service-item").forEach(item => {
+                let postSelect = item.querySelector(".post-select");
+                let postName = postSelect.options[postSelect.selectedIndex].text;
+                let qty = parseInt(item.querySelector(".quantity-input").value) || 0;
+                if (qty > 0) outNodesHTML += `<div class="tree-node node-blue" contenteditable="true">${postName}<br><small>(আউটসোর্সিং | সংখ্যা: ${toBnNum(qty)})</small></div>`;
+            });
+
+            if (toeNodesHTML !== '' || outNodesHTML !== '') {
+                hasData = true;
+                let branchesHTML = '';
+                if (toeNodesHTML !== '') branchesHTML += `<div class="tree-branch"><div class="tree-node branch-title" contenteditable="true">বিদ্যমান পদ (TO&E)</div>${toeNodesHTML}</div>`;
+                if (outNodesHTML !== '') branchesHTML += `<div class="tree-branch tree-branch-blue"><div class="tree-node branch-title branch-title-blue" contenteditable="true">প্রস্তাবিত আউটসোর্সিং পদ</div>${outNodesHTML}</div>`;
+                
+                organogramHTML += `
+                <div class="tree-container">
+                    <div class="tree-root-wrapper"><div class="tree-root" contenteditable="true">${instName}</div></div>
+                    <div class="tree-branches">${branchesHTML}</div>
+                </div>`;
+            }
+        });
+
+        let organogramSection = document.getElementById("organogramSection");
+        if(hasData) { organogramSection.innerHTML = organogramHTML; organogramSection.style.display = "block"; } 
+        else { organogramSection.innerHTML = ""; organogramSection.style.display = "none"; }
+    }
+
+    function populateScheduleG() {
+        const questions = [
+            "প্রস্তাবকারী প্রতিষ্ঠানের নাম ও সংশ্লিষ্ট মন্ত্রণালয়/বিভাগের নাম",
+            "প্রস্তাবিত সেবার নাম, সেবাকর্মীর সংখ্যা ও সময়কাল",
+            "হালনাগাদ সাংগঠনিক কাঠামোর কপি",
+            "প্রস্তাবিত সেবা ক্রয়ের অনুকূলে যৌক্তিকতা",
+            "যেসকল সেবা ক্রয়ের প্রস্তাব করা হয়েছে সেসকল সেবা বর্তমানে কীভাবে গ্রহণ করা হচ্ছে সে সংক্রান্ত তথ্য",
+            "আউটসোর্সিং প্রক্রিয়ায় বর্তমানে যেসকল সেবা গ্রহণ করা হচ্ছে সেসকল সেবার নাম, ক্যাটাগরি, সংখ্যা, সেবা ক্রয়ে অর্থ বিভাগের অনুমোদনের কপি এবং চুক্তির মেয়াদ সংক্রান্ত তথ্যাদি",
+            "যেসকল সেবা ক্রয়ের প্রস্তাব করা হয়েছে সেসকল সেবা/কাজের জন্য বিদ্যমান সাংগঠনিক কাঠামোতে পদ/কর্মরত জনবল আছে কি গঠন, থাকলে তার সংখ্যাসহ তালিকা",
+            "যে প্রতিষ্ঠানের জন্য আউটসোর্সিং প্রক্রিয়ায় সেবা ক্রয়ের প্রস্তাব করা হয়েছে উক্ত প্রতিষ্ঠানের দৈনিক ভিত্তিক/ভাউচার ভিত্তিক/অন্যান্য কোনো অস্থায়ী জনবল থাকলে তার বিস্তারিত বিবরণ",
+            "সেবা ক্রয়ের ক্ষেত্রে সেবা ক্রয়কারীর অনুকূলে নির্ধারিত কোডে বাজেটে বরাদ্দ আছে কি না এবং বার্ষিক আর্থিক সংশ্লেষের পরিমাণ",
+            "নিরাপত্তা প্রহরীর সেবা ক্রয়ের প্রস্তাবের ক্ষেত্রে দপ্তরের অবস্থান (নিজস্ব ভবনে/ভাড়া বাড়িতে/সরকারি ভবনে অবস্থিত) এবং আনসার সদস্যের বিদ্যমান সংখ্যাসংক্রান্ত তথ্য",
+            "শিক্ষাপ্রতিষ্ঠানে আউটসোর্সিং প্রক্রিয়ায় সেবা ক্রয়ের ক্ষেত্রে প্রতিষ্ঠানের শিক্ষার্থী, শিক্ষক এবং অন্যান্য জনবলের সংখ্যা এবং শিক্ষা প্রতিষ্ঠানের অবস্থান",
+            "হাসপাতালের ক্ষেত্রে বেড সংখ্যা, প্রতিদিন গড়ে আগত রোগীর সংখ্যা, ডাক্তার ও অন্যান্য কর্মরত জনবলের সংখ্যা, আকার ও আয়তন এবং আইসিইউ, সিসিইউ ও এইচডিইউ, ওটি, লিফট্‌ সংখ্যা",
+            "যে সকল অফিস/স্থাপনার জন্য সেবা ক্রয়ের প্রস্তাব করা হয়েছে তার বর্ণনা (কত তলা বিশিষ্ট কতটি ভবন, মোট আয়তন, গেটের সংখ্যা, লিফট্‌, ওয়াশরুমের সংখ্যা ইত্যাদি সহ)",
+            "অতিরিক্ত কোনো বক্তব্য যদি থাকে"
+        ];
+
+        let tbody = document.getElementById("tableBody");
+        tbody.innerHTML = ""; 
+        let numbers = ["০১", "০২", "০৩", "০৪", "০৫", "০৬", "০৭", "০৮", "০৯", "১০", "১১", "১২", "১৩", "১৪"];
+
+        for (let i = 1; i <= 14; i++) {
+            let answer = "";
+            if (i === 1) answer = document.getElementById("hidden_q1").value;
+            else if (i === 2) answer = document.getElementById("hidden_q2").value;
+            else if (i === 4) answer = "পরিশিষ্ট-খ সংযুক্ত।";
+            else if (i === 6) answer = document.getElementById("hidden_q6").value;
+            else if (i === 7) answer = document.getElementById("hidden_q7").value;
+            else if (i === 9) answer = document.getElementById("hidden_q9").value;
+            else if (i === 10) answer = document.getElementById("hidden_q10").value;
+            else if (i === 11) answer = document.getElementById("hidden_q11").value;
+            else if (i === 12) answer = document.getElementById("hidden_q12").value;
+            else if (i === 13) answer = document.getElementById("hidden_q13").value;
+            else answer = document.getElementById("q" + i).value.replace(/\n/g, "<br>");
+
+            let row = `<tr>
+                        <td width="5%" class="text-center fw-bold" contenteditable="true">${numbers[i-1]}.</td>
+                        <td width="35%" contenteditable="true">${questions[i-1]}</td>
+                        <td width="60%" style="font-size:15px; line-height:1.6;" contenteditable="true">${answer}</td>
+                       </tr>`;
+            tbody.innerHTML += row;
+        }
+    }
+
+    function editProposal() {
+        document.querySelector(".no-print").style.display = "block";
+        document.getElementById("outputSection").style.display = "none";
+    }
+</script>
+
+</body>
+</html>
